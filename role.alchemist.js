@@ -67,28 +67,27 @@ var roleAlchemist = {
                 var targetResource = mineralType;
             }
             else {
-                //----lab1 not full----
-                if (lab1.store.getUsedCapacity(Memory.structures.lab1.resource) < 1000) {
-                    var targetResource = Memory.structures.lab1.resource;
-                }
-                //----lab2 not full----
-                else if (lab2.store.getUsedCapacity(Memory.structures.lab2.resource) < 1000) {
-                    var targetResource = Memory.structures.lab2.resource;
-                }
-                //----order exist----
-                else if (order && terminal1.store.getUsedCapacity(order.resourceType) < tradeAmount) {
-                    var targetResource = order.resourceType;
-                }
-                if (targetResource) { //----find resource from storages----
-                    let rooms = Game.rooms; // 获取所有房间
-                    for (let roomName in rooms) {
-                        let room = rooms[roomName];
-                        let storage = room.storage;
-                        if (storage && storage.store[targetResource] > 0) {
-                            console.log(`在房间 ${roomName} 的 storage 中找到了 ${targetResource}`);
-                            var target = storage;
+                //----find resource from storages----
+                let rooms = Game.rooms; // 获取所有房间
+                for (let roomName in rooms) {
+                    let storage = rooms[roomName].storage;
+                    if (storage) {
+                        for (let resourceType in storage.store) { // 遍历所有资源
+                            if (resourceType == Memory.structures.lab1.resource && lab1.store.getUsedCapacity(resourceType) < 1000) {
+                                var target = storage;
+                                var targetResource = resourceType;
+                            }
+                            else if (resourceType == Memory.structures.lab2.resource && lab2.store.getUsedCapacity(resourceType) < 1000) {
+                                var target = storage;
+                                var targetResource = resourceType;
+                            }
+                            else if (order && resourceType == order.resourceType && terminal1.store.getUsedCapacity(order.resourceType) < tradeAmount) {
+                                var target = storage;
+                                var targetResource = resourceType;
+                            }
                         }
                     }
+                    // console.log(`在房间 ${roomName} 的 storage 中找到了 ${targetResource}`);
                 }
             }
             if (target) {
