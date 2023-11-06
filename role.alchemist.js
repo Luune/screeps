@@ -8,98 +8,277 @@
  */
 
 var roleAlchemist = {
-    run: function (creep, order, tradeAmount, tradeCost) {
+    run: function (creep, roomName, order, tradeAmount, tradeCost) {
         //----set status----
         if (creep.memory.transporting && creep.store.getUsedCapacity() == 0) {
             creep.memory.transporting = false;
             creep.say('🔄 loot');
         }
-
         if (!creep.memory.transporting && creep.store.getFreeCapacity() == 0) {
             creep.memory.transporting = true;
-            creep.say('🚚 transport');
+            creep.say('⚗️ send');
+        }
+        
+        // console.log('A>> ' + order.resourceType + ' ' + order.remainingAmount );
+        //----set labs----
+        if (creep.memory.loc == 'W2N27') {
+            var lab1 = Game.getObjectById(Memory.structures.lab1.id);
+            var lab1Res = Memory.structures.lab1.resource;
+            var lab2 = Game.getObjectById(Memory.structures.lab2.id);
+            var lab2Res = Memory.structures.lab2.resource;
+            var lab3 = Game.getObjectById(Memory.structures.lab3.id);
+            var lab3Res = Memory.structures.lab3.resource;
+            var lab4 = Game.getObjectById(Memory.structures.lab4.id);
+            var terminal = Game.getObjectById(Memory.structures.terminals['id1']);
+            var terminalRes = Memory.structures.terminals['resource1'];
+            var storage = Game.getObjectById(Memory.structures.storages['id1']);
+            var factory = Game.getObjectById(Memory.structures.factory1.id);
+            var factoryRes = Memory.structures.factory1.resource;
+            var factoryPrd = Memory.structures.factory1.prod;
+        }
+        else if (creep.memory.loc == 'W1N27') {
+            var terminal = Game.getObjectById(Memory.structures.terminals['id2']);
+            var terminalRes = Memory.structures.terminals['resource2'];
+            var storage = Game.getObjectById(Memory.structures.storages['id2']);
+            var lab4 = Game.getObjectById(Memory.structures.labb4.id);
+        }
+        else if (creep.memory.loc == 'W4N28') {
+            var terminal = Game.getObjectById(Memory.structures.terminals['id3']);
+            var terminalRes = Memory.structures.terminals['resource3'];
+            var storage = Game.getObjectById(Memory.structures.storages['id3']);
+            var lab4 = Game.getObjectById(Memory.structures.labc4.id);
         }
 
-        var lab1 = Game.getObjectById(Memory.structures.lab1.id);
-        var lab2 = Game.getObjectById(Memory.structures.lab2.id);
-        var lab3 = Game.getObjectById(Memory.structures.lab3.id);
-        var terminal1 = Game.getObjectById(Memory.structures.terminals['id0']);
-        var storage1 = Game.getObjectById(Memory.structures.storages['id0']);
-
+        //----run labs----
+        if (lab3) {
+            if (lab3Res == '') {
+                lab3.runReaction(lab1, lab2);
+            }
+            else {
+                lab3.reverseReaction(lab1, lab2);
+            }
+        }
+        //----run factory---
+        if (factory) { //&& factory.store.getUsedCapacity(Memory.structures.factory1.resource) >= 500 && factory.store.getUsedCapacity(RESOURCE_ENERGY) >= 200
+            var result = factory.produce(factoryPrd);
+            // console.log(result);
+        }
 
         //----trans----
         if (creep.memory.transporting) {
-            for (var resourceType of Object.keys(creep.store)) {
-                //----order exist----
-                if (order && resourceType == order.resourceType && terminal1.store.getUsedCapacity(resourceType) < tradeAmount) {
-                    var target = terminal1;
-                    console.log('A>> to terminal: ' + target.id);
-                }
-                else {
-                    //----fill labs----
-                    if (resourceType == Memory.structures.lab1.resource && lab1.store.getFreeCapacity(resourceType) > 1000) {
-                        var target = lab1;
-                        console.log('A>> to lab1: ' + target.id);
+            if (!creep.memory.target) {
+                for (var resourceType of Object.keys(creep.store)) {
+                    //----order exist----
+                    if (order && resourceType == order.resourceType && terminal.store.getUsedCapacity(resourceType) < tradeAmount) {
+                        creep.memory.target = terminal.id;
+                        creep.memory.targetResource = resourceType;
+                        console.log('⚗️ A>> to terminal: ' + resourceType);
+                        break;
                     }
-                    else if (resourceType == Memory.structures.lab2.resource && lab2.store.getFreeCapacity(resourceType) > 1000) {
-                        var target = lab2;
-                        console.log('A>> to lab2: ' + target.id);
+                    //----fill labs----
+                    else if (lab3Res == '' && resourceType == lab1Res && lab1.store.getUsedCapacity(resourceType) < 50) {
+                        creep.memory.target = lab1.id;
+                        creep.memory.targetResource = resourceType;
+                        console.log('⚗️ A>> to lab1: ' + resourceType);
+                        break;
+                    }
+                    else if (lab3Res == '' && resourceType == lab2Res && lab2.store.getUsedCapacity(resourceType) < 50) {
+                        creep.memory.target = lab2.id;
+                        creep.memory.targetResource = resourceType;
+                        console.log('⚗️ A>> to lab2: ' + resourceType);
+                        break;
+                    }
+                    else if (lab3Res != '' && resourceType == lab3Res && lab3.store.getUsedCapacity(resourceType) < 50) {
+                        creep.memory.target = lab3.id;
+                        creep.memory.targetResource = resourceType;
+                        console.log('⚗️ A>> to lab3: ' + resourceType);
+                        break;
+                    }
+                    //----fill factory resource----
+                    else if (factoryRes && resourceType == factoryRes && factory.store.getUsedCapacity(resourceType) < 600) {
+                        creep.memory.target = factory.id;
+                        creep.memory.targetResource = resourceType;
+                        console.log('⚗️ A>> to factory: ' + resourceType);
+                        break;
+                    }
+                    //----fill terminal transfer----
+                    else if (terminalRes && resourceType == terminalRes && terminal.store[resourceType] < 10000) {
+                        creep.memory.target = terminal.id;
+                        creep.memory.targetResource = resourceType;
+                        console.log('⚗️ A>> to terminal: ' + resourceType);
+                        break;
                     }
                     //----to storage----
                     else {
-                        var target = storage1;
-                        console.log('A>> to storage1: ' + target.id);
+                        creep.memory.target = storage.id;
+                        creep.memory.targetResource = resourceType;
+                        console.log('⚗️ A>> to storage: ' + resourceType);
+                        break;
                     }
                 }
-                if (target.room != creep.room) {
-                    creep.moveTo(new RoomPosition(25, 25, target.room.name), { reusePath: 30, visualizePathStyle: { stroke: '#ffeb0b' } });
-                } else if (creep.transfer(target, resourceType) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { reusePath: creep.pos.findPathTo(target), visualizePathStyle: { stroke: '#ffeb0b' } });
+            }
+            var target = Game.getObjectById(creep.memory.target);
+            var targetResource = creep.memory.targetResource;
+            if (target) {
+                // if (target.room != creep.room) {
+                //     creep.moveTo(new RoomPosition(25, 25, target.room.name), { reusePath: 30, visualizePathStyle: { stroke: '#ffeb0b' } });
+                // } else 
+                let result = creep.transfer(target, targetResource);
+                if (result== ERR_NOT_IN_RANGE) {
+                    if (!creep.memory.path) {
+                        creep.memory.path = creep.pos.findPathTo(target);
+                    }
+                    // creep.moveTo(target, { visualizePathStyle: { stroke: '#ffeb0b' } });
+                    creep.moveByPath(creep.memory.path);
+                    creep.say('⚗️>' + target.pos.x + ',' + target.pos.y);
+                    if (creep.memory.path) {
+                        // 获取creep的路线
+                        var path = creep.memory.path;
+                        // 获取下一步位置
+                        var nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                        // 在下一步位置查找所有对象
+                        var objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
+                        if (objects.length > 0) {
+                            delete creep.memory.path;
+                        }
+                    }
+                }
+                else { //if (result == OK) 
+                    delete creep.memory.target;
+                    delete creep.memory.targetResource;
+                    delete creep.memory.path;
                 }
             }
         }
         //----loot----
         else {
-            //----clear lab3----
-            let mineralType = lab3.mineralType;
-            if (mineralType) {
-                var target = lab3;
-                var targetResource = mineralType;
-            }
-            else {
-                //----find resource from storages----
-                let rooms = Game.rooms; // 获取所有房间
-                for (let roomName in rooms) {
-                    let storage = rooms[roomName].storage;
-                    if (storage) {
-                        for (let resourceType in storage.store) { // 遍历所有资源
-                            if (resourceType == Memory.structures.lab1.resource && lab1.store.getUsedCapacity(resourceType) < 1000) {
-                                var target = storage;
-                                var targetResource = resourceType;
-                            }
-                            else if (resourceType == Memory.structures.lab2.resource && lab2.store.getUsedCapacity(resourceType) < 1000) {
-                                var target = storage;
-                                var targetResource = resourceType;
-                            }
-                            else if (order && resourceType == order.resourceType && terminal1.store.getUsedCapacity(order.resourceType) < tradeAmount) {
-                                var target = storage;
-                                var targetResource = resourceType;
-                            }
+            if (!creep.memory.target) {
+                if (storage) {  //----find resource from storage----
+                    for (let resourceType in storage.store) { // 遍历所有资源
+                        if (resourceType == lab1Res && lab1.store.getUsedCapacity(resourceType) < 30 && lab3Res == '') { //----lab1 need for reaction----
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from storage to lab1: ' + resourceType);
+                            break;
+                        }
+                        else if (resourceType == lab2Res && lab2.store.getUsedCapacity(resourceType) < 30 && lab3Res == '') { //----lab2 need for reaction----
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from storage to lab2: ' + resourceType);
+                            break;
+                        }
+                        else if (resourceType == lab3Res && lab3.store.getUsedCapacity(resourceType) < 30) { //----lab3 need for revert reaction----
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️ A>> from storage to lab3: ' + resourceType);
+                            break;
+                        }
+                        else if (resourceType == factoryRes && factory.store.getUsedCapacity(resourceType) < 600 && factory.store.getUsedCapacity(factoryPrd) < 1000) { //----factory need for produce----
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from storage tf: ' + resourceType);
+                            break;
+                        }
+                        else if (resourceType == terminalRes && terminal.store[resourceType] < 10000) { //----terminal need for transfer----
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from storage tt: ' + resourceType);
+                            break;
+                        }
+                        else if (order && resourceType == order.resourceType && terminal.store.getUsedCapacity(order.resourceType) < tradeAmount) {
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from storage tt: ' + resourceType);
+                            break;
                         }
                     }
-                    // console.log(`在房间 ${roomName} 的 storage 中找到了 ${targetResource}`);
+                }
+                if (lab1 && lab1.mineralType && lab3Res != '') { //----revert reaction, clear lab1----
+                    creep.memory.target = lab1.id;
+                    creep.memory.targetResource = lab1.mineralType;
+                    console.log('⚗️ A>> from lab1: ' + lab1.mineralType);
+                    // break;
+                }
+                else if (lab2 && lab2.mineralType && lab3Res != '') { //----revert reaction, clear lab2----
+                    creep.memory.target = lab2.id;
+                    creep.memory.targetResource = lab2.mineralType;
+                    console.log('⚗️ A>> from lab2: ' + lab2.mineralType);
+                    // break;
+                }
+                else if (lab3 && lab3.mineralType && lab3Res == '') { //----run reaction, clear lab3----
+                    creep.memory.target = lab3.id;
+                    creep.memory.targetResource = lab3.mineralType;
+                    console.log('⚗️ A>> from lab3: ' + lab3.mineralType);
+                    // break;
+                }
+                else if (lab4 && lab4.mineralType) { //----clear lab4----
+                    creep.memory.target = lab4.id;
+                    creep.memory.targetResource = lab4.mineralType;
+                    console.log('⚗️ A>> from lab4: ' + lab4.mineralType);
+                    // break;
+                }
+                if (terminal) {
+                    for (let resourceType in terminal.store) {
+                        if (order && resourceType != RESOURCE_ENERGY && resourceType != order.resourceType && resourceType != terminalRes && terminal.store[resourceType] > 0) { //----remove terminal resource not needed for trade----
+                            creep.memory.target = terminal.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from terminal: ' + resourceType);
+                            break;
+                        }
+                        else if (!order && resourceType != RESOURCE_ENERGY && resourceType != terminalRes && terminal.store[resourceType] > 0) { //----remove terminal resource if no trade----
+                            creep.memory.target = terminal.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from terminal 2: ' + resourceType);
+                            break;
+                        }
+                        else if (resourceType == terminalRes && terminal.store[resourceType] > 10100) { //----remove extra terminal resource----
+                            creep.memory.target = terminal.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from terminal 2: ' + resourceType);
+                            break;
+                        }
+                    }
+                }
+                if (factory) {
+                    for (let resourceType in factory.store) {
+                        if (resourceType != factoryRes && resourceType != RESOURCE_ENERGY) { //----clear factory produced and other resource----
+                            creep.memory.target = factory.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from factory: ' + resourceType);
+                            break;
+                        }
+                    }
                 }
             }
+            var target = Game.getObjectById(creep.memory.target);
+            var targetResource = creep.memory.targetResource;
             if (target) {
-                console.log('A>> from: ' + target.id + ' take: ' + targetResource);
+                // console.log('⚗️A>> from: ' + target.id + ' take: ' + targetResource);
                 if (target.room != creep.room) {
                     creep.moveTo(new RoomPosition(25, 25, target.room.name), { reusePath: 30, visualizePathStyle: { stroke: '#ffeb0b' } });
-                } else if (creep.withdraw(target, targetResource) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { reusePath: 3, visualizePathStyle: { stroke: '#ffeb0b' } });
+                } else {
+                    let result = creep.withdraw(target, targetResource);
+                    if (result == ERR_NOT_IN_RANGE) {
+                        if (!creep.memory.path) {
+                            creep.memory.path = creep.pos.findPathTo(target);
+                        }
+                        // creep.moveTo(target, { reusePath: 3, visualizePathStyle: { stroke: '#ffeb0b' } });
+                        creep.moveByPath(creep.memory.path);
+                        creep.say('⚗️>' + target.pos.x + ',' + target.pos.y);
+                    }
+                    else {
+                        delete creep.memory.target;
+                        delete creep.memory.targetResource;
+                        delete creep.memory.path;
+                    }
                 }
             }
             else if (creep.store.getUsedCapacity() > 0) { //----没得捡了就存掉----
                 creep.memory.transporting = true;
+                delete creep.memory.target;
+                delete creep.memory.targetResource;
+                delete creep.memory.path;
+                creep.say('⚗️ send');
             }
         }
     }
