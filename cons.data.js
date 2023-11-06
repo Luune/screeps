@@ -42,8 +42,8 @@ var consData = {
             },
             'factory1': {
                 'id': '652cec5465fe9b42500b7f10',
-                'resource': RESOURCE_ENERGY, //RESOURCE_OXYGEN, RESOURCE_LEMERGIUM, RESOURCE_ZYNTHIUM, RESOURCE_ENERGY
-                'prod': RESOURCE_BATTERY //RESOURCE_OXIDANT, RESOURCE_LEMERGIUM_BAR, RESOURCE_ZYNTHIUM_BAR, RESOURCE_BATTERY
+                'resource': '', //RESOURCE_OXYGEN, RESOURCE_LEMERGIUM, RESOURCE_ZYNTHIUM, RESOURCE_ENERGY
+                'prod': '' //RESOURCE_OXIDANT, RESOURCE_LEMERGIUM_BAR, RESOURCE_ZYNTHIUM_BAR, RESOURCE_BATTERY
             },
             "labb4": {
                 "id": "65344bc3cb8a247b3faf4b25",
