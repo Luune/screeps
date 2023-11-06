@@ -258,7 +258,7 @@ module.exports.loop = function () {
             if (enAvail >= 1600) {
                 var newName = 'Builder' + roomName + Game.time;
                 console.log('M>> Spawning new builder: ' + newName);
-                Game.spawns[spawnName].spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
+                Game.spawns[spawnName].spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
             }
             else if (enAvail >= 1200) {
                 var newName = 'Builder' + roomName + Game.time;

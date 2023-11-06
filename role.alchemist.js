@@ -59,7 +59,7 @@ var roleAlchemist = {
             }
         }
         //----run factory---
-        if (factory) { //&& factory.store.getUsedCapacity(Memory.structures.factory1.resource) >= 500 && factory.store.getUsedCapacity(RESOURCE_ENERGY) >= 200
+        if (factory) { //&& factory.store[Memory.structures.factory1.resource] >= 500 && factory.store[RESOURCE_ENERGY] >= 200
             var result = factory.produce(factoryPrd);
             // console.log(result);
         }
@@ -69,33 +69,39 @@ var roleAlchemist = {
             if (!creep.memory.target) {
                 for (var resourceType of Object.keys(creep.store)) {
                     //----order exist----
-                    if (order && resourceType == order.resourceType && terminal.store.getUsedCapacity(resourceType) < tradeAmount) {
+                    if (order && resourceType == order.resourceType && terminal.store[resourceType] < tradeAmount) {
                         creep.memory.target = terminal.id;
                         creep.memory.targetResource = resourceType;
                         console.log('⚗️ A>> to terminal: ' + resourceType);
                         break;
                     }
                     //----fill labs----
-                    else if (lab3Res == '' && resourceType == lab1Res && lab1.store.getUsedCapacity(resourceType) < 50) {
+                    else if (lab3Res == '' && resourceType == lab1Res && lab1.store[resourceType] < 50) {
                         creep.memory.target = lab1.id;
                         creep.memory.targetResource = resourceType;
                         console.log('⚗️ A>> to lab1: ' + resourceType);
                         break;
                     }
-                    else if (lab3Res == '' && resourceType == lab2Res && lab2.store.getUsedCapacity(resourceType) < 50) {
+                    else if (lab3Res == '' && resourceType == lab2Res && lab2.store[resourceType] < 50) {
                         creep.memory.target = lab2.id;
                         creep.memory.targetResource = resourceType;
                         console.log('⚗️ A>> to lab2: ' + resourceType);
                         break;
                     }
-                    else if (lab3Res != '' && resourceType == lab3Res && lab3.store.getUsedCapacity(resourceType) < 50) {
+                    else if (lab3Res != '' && resourceType == lab3Res && lab3.store[resourceType] < 50) {
                         creep.memory.target = lab3.id;
                         creep.memory.targetResource = resourceType;
                         console.log('⚗️ A>> to lab3: ' + resourceType);
                         break;
                     }
                     //----fill factory resource----
-                    else if (factoryRes && resourceType == factoryRes && factory.store.getUsedCapacity(resourceType) < 600) {
+                    else if (factoryRes && resourceType == factoryRes && factory.store[resourceType] < 600) {
+                        creep.memory.target = factory.id;
+                        creep.memory.targetResource = resourceType;
+                        console.log('⚗️ A>> to factory: ' + resourceType);
+                        break;
+                    }
+                    else if (factory && resourceType == RESOURCE_ENERGY && factory.store[resourceType] < 200) {
                         creep.memory.target = factory.id;
                         creep.memory.targetResource = resourceType;
                         console.log('⚗️ A>> to factory: ' + resourceType);
@@ -103,6 +109,12 @@ var roleAlchemist = {
                     }
                     //----fill terminal transfer----
                     else if (terminalRes && resourceType == terminalRes && terminal.store[resourceType] < 10000) {
+                        creep.memory.target = terminal.id;
+                        creep.memory.targetResource = resourceType;
+                        console.log('⚗️ A>> to terminal: ' + resourceType);
+                        break;
+                    }
+                    else if (terminal && resourceType == RESOURCE_ENERGY && terminal.store[resourceType] < 5000) {
                         creep.memory.target = terminal.id;
                         creep.memory.targetResource = resourceType;
                         console.log('⚗️ A>> to terminal: ' + resourceType);
@@ -155,28 +167,34 @@ var roleAlchemist = {
             if (!creep.memory.target) {
                 if (storage) {  //----find resource from storage----
                     for (let resourceType in storage.store) { // 遍历所有资源
-                        if (resourceType == lab1Res && lab1.store.getUsedCapacity(resourceType) < 30 && lab3Res == '') { //----lab1 need for reaction----
+                        if (resourceType == lab1Res && lab1.store[resourceType] < 30 && lab3Res == '') { //----lab1 need for reaction----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
                             console.log('⚗️A>> from storage to lab1: ' + resourceType);
                             break;
                         }
-                        else if (resourceType == lab2Res && lab2.store.getUsedCapacity(resourceType) < 30 && lab3Res == '') { //----lab2 need for reaction----
+                        else if (resourceType == lab2Res && lab2.store[resourceType] < 30 && lab3Res == '') { //----lab2 need for reaction----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
                             console.log('⚗️A>> from storage to lab2: ' + resourceType);
                             break;
                         }
-                        else if (resourceType == lab3Res && lab3.store.getUsedCapacity(resourceType) < 30) { //----lab3 need for revert reaction----
+                        else if (resourceType == lab3Res && lab3.store[resourceType] < 30) { //----lab3 need for revert reaction----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
                             console.log('⚗️ A>> from storage to lab3: ' + resourceType);
                             break;
                         }
-                        else if (resourceType == factoryRes && factory.store.getUsedCapacity(resourceType) < 600 && factory.store.getUsedCapacity(factoryPrd) < 1000) { //----factory need for produce----
+                        else if (resourceType == factoryRes && factory.store[resourceType] < 600 && storage.store[factoryPrd] < 1000) { //----factory need for produce----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
                             console.log('⚗️A>> from storage tf: ' + resourceType);
+                            break;
+                        }
+                        else if (factory && resourceType == RESOURCE_ENERGY && factory.store[resourceType] < 200) { //----factory need for produce----
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from storage tfe: ' + resourceType);
                             break;
                         }
                         else if (resourceType == terminalRes && terminal.store[resourceType] < 10000) { //----terminal need for transfer----
@@ -185,10 +203,16 @@ var roleAlchemist = {
                             console.log('⚗️A>> from storage tt: ' + resourceType);
                             break;
                         }
-                        else if (order && resourceType == order.resourceType && terminal.store.getUsedCapacity(order.resourceType) < tradeAmount) {
+                        else if (terminal && resourceType == RESOURCE_ENERGY && terminal.store[resourceType] < 5000) { //----terminal need for transfer----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from storage tt: ' + resourceType);
+                            console.log('⚗️A>> from storage tte: ' + resourceType);
+                            break;
+                        }
+                        else if (order && resourceType == order.resourceType && terminal.store[order.resourceType] < tradeAmount) {
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            console.log('⚗️A>> from storage tto: ' + resourceType);
                             break;
                         }
                     }
