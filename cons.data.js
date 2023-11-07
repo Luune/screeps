@@ -35,7 +35,7 @@ var consData = {
             },
             "lab3": {
                 'id': '651e6d6686831591a7847dcf',
-                'esource': 'GO' //----for revert reaction----
+                'resource': 'GO' //----for revert reaction----
             },
             "lab4": {
                 'id': '652f1266d89677b5963ed87f',
