@@ -336,7 +336,12 @@ module.exports.loop = function () {
             if (extractors.length > 0 && mineral.mineralAmount > 0) {
                 console.log(`M>> 矿物 ${mineral.mineralType} 可以采集 ${mineral.mineralAmount}`);
                 if (miners.length < 1) {
-                    if (enAvail >= 800) {
+                    if (enAvail >= 1600) {
+                        var newName = 'Miner' + roomName + Game.time;
+                        console.log('M>> Spawning new miner: ' + newName);
+                        Game.spawns[spawnName].spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'miner', loc: roomName } });
+                    }
+                    else if (enAvail >= 800) {
                         var newName = 'Miner' + roomName + Game.time;
                         console.log('M>> Spawning new miner: ' + newName);
                         Game.spawns[spawnName].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'miner', loc: roomName } });

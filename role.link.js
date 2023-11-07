@@ -32,6 +32,12 @@ var roleLink = {
         if (linkc1.store[RESOURCE_ENERGY] >= 100 && linkc2.store.getFreeCapacity(RESOURCE_ENERGY) > 100) {
             linkc1.transferEnergy(linkc2);
         }
+        //----W5N28----
+        var linkd1 = Game.getObjectById('6549998cce5f31cfe3c5f31a');
+        var linkd2 = Game.getObjectById('6549c3d0dd5e82540ff210c3');
+        if (linkd1.store[RESOURCE_ENERGY] >= 100 && linkd2.store.getFreeCapacity(RESOURCE_ENERGY) > 100) {
+            linkd1.transferEnergy(linkd2);
+        }
     }
 }
 
