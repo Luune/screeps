@@ -17,7 +17,7 @@ var consData = {
                 'id2': '65332c1f8919c3c4b933b1e8',
                 'resource2': 'L',
                 'id3': '653eba128b9e097d44dd634d',
-                'resource3': ''
+                'resource3': 'KO'
             },
             "storages": {
                 'id1': '65052ea2c34196660d3e9925',
@@ -25,6 +25,7 @@ var consData = {
                 'id3': '652f4d36ce5f314043bef866',
                 'id4': '6544876215eba16733fdb93b'
             },
+            //----W2N27----
             "lab1": {
                 'id': '6516e83ffa84f734a619576d',
                 "resource": '' //----for reaction----
@@ -37,20 +38,22 @@ var consData = {
                 'id': '651e6d6686831591a7847dcf',
                 'resource': 'GO' //----for revert reaction----
             },
-            "lab4": {
+            "labM": {
                 'id': '652f1266d89677b5963ed87f',
                 'resource': ''
             },
             'factory1': {
                 'id': '652cec5465fe9b42500b7f10',
-                'resource': '', //RESOURCE_OXYGEN, RESOURCE_LEMERGIUM, RESOURCE_ZYNTHIUM, RESOURCE_ENERGY
-                'prod': '' //RESOURCE_OXIDANT, RESOURCE_LEMERGIUM_BAR, RESOURCE_ZYNTHIUM_BAR, RESOURCE_BATTERY
+                'resource': RESOURCE_ENERGY, //RESOURCE_OXYGEN, RESOURCE_LEMERGIUM, RESOURCE_ZYNTHIUM, RESOURCE_ENERGY
+                'prod': RESOURCE_BATTERY //RESOURCE_OXIDANT, RESOURCE_LEMERGIUM_BAR, RESOURCE_ZYNTHIUM_BAR, RESOURCE_BATTERY
             },
-            "labb4": {
+            //----W1N27----
+            "labMb": {
                 'id': '65344bc3cb8a247b3faf4b25',
                 'resource': ''
             },
-            "labc4": {
+            //----W4N28----
+            "labMc": {
                 'id': '653dd6733e19ec63f4e55563',
                 'resource': ''
             },

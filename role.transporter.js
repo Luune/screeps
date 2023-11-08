@@ -4,10 +4,16 @@ var roleTransporter = {
         //----set status----
         if (creep.memory.transporting && creep.store.getUsedCapacity() == 0) {
             creep.memory.transporting = false;
+            delete creep.memory.target;
+            delete creep.memory.targetResource;
+            delete creep.memory.path;
             creep.say('🚛 loot');
         }
         if (!creep.memory.transporting && creep.store.getFreeCapacity() == 0) {
             creep.memory.transporting = true;
+            delete creep.memory.target;
+            delete creep.memory.targetResource;
+            delete creep.memory.path;
             creep.say('🚚 transport');
         }
 
@@ -31,7 +37,7 @@ var roleTransporter = {
         var containersToFill = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_CONTAINER
-                    && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                    && structure.store.getFreeCapacity(RESOURCE_ENERGY) >= 1000;
             }
         });
         var containersToLoot = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
@@ -189,6 +195,11 @@ var roleTransporter = {
                     creep.memory.target = terminal1.id;
                     creep.memory.targetResource = RESOURCE_ENERGY;
                 }
+                //----pick storage----
+                else if (emptyExtensions.length > 0 && emptyStorage.store[RESOURCE_ENERGY] > 2000) {
+                    creep.memory.target = emptyStorage.id;
+                    creep.memory.targetResource = RESOURCE_ENERGY;
+                }
                 // //----没得捡了就存掉----
                 // else if (creep.store.getFreeCapacity(RESOURCE_ENERGY) < creep.store.getCapacity() / 2) {
                 //     creep.memory.transporting = true;
@@ -225,10 +236,10 @@ var roleTransporter = {
                 }
             }
             else {
-                    delete creep.memory.target;
-                    delete creep.memory.targetResource;
-                    delete creep.memory.path;
-                }
+                delete creep.memory.target;
+                delete creep.memory.targetResource;
+                delete creep.memory.path;
+            }
         }
     }
 };

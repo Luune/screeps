@@ -13,8 +13,6 @@ var roleBuilder = {
         //----set status----
         if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.building = false;
-            delete creep.memory.target;
-            delete creep.memory.path;
             creep.say('🔄 reload');
         }
         if (!creep.memory.building && creep.store.getFreeCapacity() == 0) {
@@ -50,38 +48,22 @@ var roleBuilder = {
                     }
                 }
                 else { //----fix----
-                    if (!creep.memory.target) {
-                        let damagedStructures = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
-                            filter: (structure) => {
-                                return (structure.structureType == STRUCTURE_CONTAINER ||
-                                    structure.structureType == STRUCTURE_TOWER ||
-                                    (structure.structureType == STRUCTURE_RAMPART && structure.hits < ((structure.room.controller.level * 10000) + storageStorage * 10)) ||
-                                    structure.structureType == STRUCTURE_LINK ||
-                                    structure.structureType == STRUCTURE_ROAD ||
-                                    (structure.structureType == STRUCTURE_WALL && structure.hits < ((structure.room.controller.level * 10000) + storageStorage * 10))) &&
-                                    structure.hits < structure.hitsMax;
-                            }
-                        });
-                        if (damagedStructures.length > 0) {
-                            creep.memory.target = _.sortBy(damagedStructures, s => s.hits)[0].id;
+                    let damagedStructures = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
+                        filter: (structure) => {
+                            return (structure.structureType == STRUCTURE_CONTAINER ||
+                                structure.structureType == STRUCTURE_TOWER ||
+                                (structure.structureType == STRUCTURE_RAMPART && structure.hits < ((structure.room.controller.level * 10000) + storageStorage * 10)) ||
+                                structure.structureType == STRUCTURE_LINK ||
+                                structure.structureType == STRUCTURE_ROAD ||
+                                (structure.structureType == STRUCTURE_WALL && structure.hits < ((structure.room.controller.level * 10000) + storageStorage * 10))) &&
+                                structure.hits < structure.hitsMax;
                         }
-
-                    }
-
-                    target = Game.getObjectById(creep.memory.target);
-
+                    });
+                    let target = _.sortBy(damagedStructures, s => s.hits)[0];
                     if (target) {
                         if (creep.repair(target) == ERR_NOT_IN_RANGE) {
-                            if (!creep.memory.path) {
-                                creep.memory.path = creep.pos.findPathTo(target);
-                            }
-                            // creep.moveTo(target, { visualizePathStyle: { stroke: '#0099ff' } });
-                            creep.moveByPath(creep.memory.path);
+                            creep.moveTo(target, { visualizePathStyle: { stroke: '#0099ff' } });
                             creep.say('🛠️ fix');
-                        }
-                        else {
-                            delete creep.memory.target;
-                            delete creep.memory.path;
                         }
                     }
                 }
@@ -98,7 +80,7 @@ var roleBuilder = {
             }
             if (target && target.room.name == creep.memory.loc) {
                 if (creep.dismantle(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#0099ff' } });
+                    creep.moveTo(target, { visualizePathStyle: { stroke: '#0099ff' } });
                 }
             }
             else {
@@ -127,7 +109,7 @@ var roleBuilder = {
                     if (containers.length > 0) {
                         let target = creep.pos.findClosestByPath(containers);
                         if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#0099ff' } });
+                            creep.moveTo(target, { visualizePathStyle: { stroke: '#0099ff' } });
                             creep.say('🚧C:' + target.pos.x + ',' + target.pos.y);
                         }
                     }
@@ -141,7 +123,7 @@ var roleBuilder = {
                         });
                         if (target) {
                             if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#0099ff' } });
+                                creep.moveTo(target, { visualizePathStyle: { stroke: '#0099ff' } });
                                 creep.say('🚧S:' + target.pos.x + ',' + target.pos.y);
                             }
                         }
@@ -149,7 +131,7 @@ var roleBuilder = {
                             let target = creep.pos.findClosestByPath(FIND_SOURCES);
                             console.log('🚧 B>> harvest: ' + target);
                             if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#0099ff' } });
+                                creep.moveTo(target, { visualizePathStyle: { stroke: '#0099ff' } });
                                 creep.say('🚧B>harv');
                             }
                         }

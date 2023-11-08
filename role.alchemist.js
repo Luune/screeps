@@ -12,7 +12,7 @@ var roleAlchemist = {
         //----set status----
         if (creep.memory.transporting && creep.store.getUsedCapacity() == 0) {
             creep.memory.transporting = false;
-            creep.say('🔄 loot');
+            creep.say('🧪 loot');
         }
         if (!creep.memory.transporting && creep.store.getFreeCapacity() == 0) {
             creep.memory.transporting = true;
@@ -28,7 +28,7 @@ var roleAlchemist = {
             var lab2Res = Memory.structures.lab2.resource;
             var lab3 = Game.getObjectById(Memory.structures.lab3.id);
             var lab3Res = Memory.structures.lab3.resource;
-            var lab4 = Game.getObjectById(Memory.structures.lab4.id);
+            var labM = Game.getObjectById(Memory.structures.labM.id);
             var terminal = Game.getObjectById(Memory.structures.terminals['id1']);
             var terminalRes = Memory.structures.terminals['resource1'];
             var storage = Game.getObjectById(Memory.structures.storages['id1']);
@@ -40,13 +40,13 @@ var roleAlchemist = {
             var terminal = Game.getObjectById(Memory.structures.terminals['id2']);
             var terminalRes = Memory.structures.terminals['resource2'];
             var storage = Game.getObjectById(Memory.structures.storages['id2']);
-            var lab4 = Game.getObjectById(Memory.structures.labb4.id);
+            var labM = Game.getObjectById(Memory.structures.labMb.id);
         }
         else if (creep.memory.loc == 'W4N28') {
             var terminal = Game.getObjectById(Memory.structures.terminals['id3']);
             var terminalRes = Memory.structures.terminals['resource3'];
             var storage = Game.getObjectById(Memory.structures.storages['id3']);
-            var lab4 = Game.getObjectById(Memory.structures.labc4.id);
+            var labM = Game.getObjectById(Memory.structures.labMc.id);
         }
 
         //----run labs----
@@ -170,49 +170,49 @@ var roleAlchemist = {
                         if (resourceType == lab1Res && lab1.store[resourceType] < 30 && lab3Res == '') { //----lab1 need for reaction----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from storage to lab1: ' + resourceType);
+                            console.log('🧪A>> from storage to lab1: ' + resourceType);
                             break;
                         }
                         else if (resourceType == lab2Res && lab2.store[resourceType] < 30 && lab3Res == '') { //----lab2 need for reaction----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from storage to lab2: ' + resourceType);
+                            console.log('🧪A>> from storage to lab2: ' + resourceType);
                             break;
                         }
                         else if (resourceType == lab3Res && lab3.store[resourceType] < 30) { //----lab3 need for revert reaction----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️ A>> from storage to lab3: ' + resourceType);
+                            console.log('🧪A>> from storage to lab3: ' + resourceType);
                             break;
                         }
                         else if (resourceType == terminalRes && terminal.store[resourceType] < 10000) { //----terminal need for transfer----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from storage tt: ' + resourceType);
+                            console.log('🧪A>> from storage tt: ' + resourceType);
                             break;
                         }
                         else if (terminal && resourceType == RESOURCE_ENERGY && terminal.store[resourceType] < 5000) { //----terminal need energy for transfer----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from storage tte: ' + resourceType);
+                            console.log('🧪A>> from storage tte: ' + resourceType);
                             break;
                         }
                         else if (resourceType == factoryRes && factory.store[resourceType] < 600 && storage.store[factoryPrd] + terminal.store[factoryPrd] < 1000) { //----factory need for produce----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from storage tf: ' + resourceType);
+                            console.log('🧪A>> from storage tf: ' + resourceType);
                             break;
                         }
                         else if (factory && resourceType == RESOURCE_ENERGY && factory.store[resourceType] < 200) { //----factory need energy for produce----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from storage tfe: ' + resourceType);
+                            console.log('🧪A>> from storage tfe: ' + resourceType);
                             break;
                         }
                         else if (order && resourceType == order.resourceType && terminal.store[order.resourceType] < tradeAmount) {
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from storage tto: ' + resourceType);
+                            console.log('🧪A>> from storage tto: ' + resourceType);
                             break;
                         }
                     }
@@ -220,25 +220,25 @@ var roleAlchemist = {
                 if (lab1 && lab1.mineralType && lab3Res != '') { //----revert reaction, clear lab1----
                     creep.memory.target = lab1.id;
                     creep.memory.targetResource = lab1.mineralType;
-                    console.log('⚗️ A>> from lab1: ' + lab1.mineralType);
+                    console.log('🧪A>> from lab1: ' + lab1.mineralType);
                     // break;
                 }
                 else if (lab2 && lab2.mineralType && lab3Res != '') { //----revert reaction, clear lab2----
                     creep.memory.target = lab2.id;
                     creep.memory.targetResource = lab2.mineralType;
-                    console.log('⚗️ A>> from lab2: ' + lab2.mineralType);
+                    console.log('🧪A>> from lab2: ' + lab2.mineralType);
                     // break;
                 }
-                else if (lab3 && lab3.mineralType && lab3Res == '') { //----run reaction, clear lab3----
+                else if (lab3 && lab3.mineralType && lab3.mineralType != lab3Res) { //----run reaction, clear lab3----
                     creep.memory.target = lab3.id;
                     creep.memory.targetResource = lab3.mineralType;
-                    console.log('⚗️ A>> from lab3: ' + lab3.mineralType);
+                    console.log('🧪A>> from lab3: ' + lab3.mineralType);
                     // break;
                 }
-                else if (lab4 && lab4.mineralType) { //----clear lab4----
-                    creep.memory.target = lab4.id;
-                    creep.memory.targetResource = lab4.mineralType;
-                    console.log('⚗️ A>> from lab4: ' + lab4.mineralType);
+                else if (labM && labM.mineralType) { //----clear labM----
+                    creep.memory.target = labM.id;
+                    creep.memory.targetResource = labM.mineralType;
+                    console.log('🧪A>> from labM: ' + labM.mineralType);
                     // break;
                 }
                 if (terminal) {
@@ -246,19 +246,19 @@ var roleAlchemist = {
                         if (order && resourceType != RESOURCE_ENERGY && resourceType != order.resourceType && resourceType != terminalRes && terminal.store[resourceType] > 0) { //----remove terminal resource not needed for trade----
                             creep.memory.target = terminal.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from terminal: ' + resourceType);
+                            console.log('🧪A>> from terminal: ' + resourceType);
                             break;
                         }
                         else if (!order && resourceType != RESOURCE_ENERGY && resourceType != terminalRes && terminal.store[resourceType] > 0) { //----remove terminal resource if no trade----
                             creep.memory.target = terminal.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from terminal 2: ' + resourceType);
+                            console.log('🧪A>> from terminal 2: ' + resourceType);
                             break;
                         }
                         else if (resourceType == terminalRes && terminal.store[resourceType] > 10100) { //----remove extra terminal resource----
                             creep.memory.target = terminal.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from terminal 2: ' + resourceType);
+                            console.log('🧪A>> from terminal 2: ' + resourceType);
                             break;
                         }
                     }
@@ -268,7 +268,7 @@ var roleAlchemist = {
                         if (resourceType != factoryRes && resourceType != RESOURCE_ENERGY) { //----clear factory produced and other resource----
                             creep.memory.target = factory.id;
                             creep.memory.targetResource = resourceType;
-                            console.log('⚗️A>> from factory: ' + resourceType);
+                            console.log('🧪A>> from factory: ' + resourceType);
                             break;
                         }
                     }
@@ -277,7 +277,7 @@ var roleAlchemist = {
             var target = Game.getObjectById(creep.memory.target);
             var targetResource = creep.memory.targetResource;
             if (target) {
-                // console.log('⚗️A>> from: ' + target.id + ' take: ' + targetResource);
+                // console.log('🧪A>> from: ' + target.id + ' take: ' + targetResource);
                 if (target.room != creep.room) {
                     creep.moveTo(new RoomPosition(25, 25, target.room.name), { reusePath: 30, visualizePathStyle: { stroke: '#ffeb0b' } });
                 } else {
@@ -288,7 +288,7 @@ var roleAlchemist = {
                         }
                         // creep.moveTo(target, { reusePath: 3, visualizePathStyle: { stroke: '#ffeb0b' } });
                         creep.moveByPath(creep.memory.path);
-                        creep.say('⚗️>' + target.pos.x + ',' + target.pos.y);
+                        creep.say('🧪>' + target.pos.x + ',' + target.pos.y);
                     }
                     else {
                         delete creep.memory.target;
