@@ -30,7 +30,7 @@ var roleHarvester = {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_LINK
                     && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-                    && creep.pos.getRangeTo(structure) <= 2);
+                    && creep.pos.inRangeTo(structure, 2));
             }
         });
 
@@ -48,6 +48,7 @@ var roleHarvester = {
                     }
                 });
                 let contain = creep.pos.findClosestByRange(damagedStructures);
+
                 if (contain) {
                     if (creep.repair(contain) == ERR_NOT_IN_RANGE) { }
                 }
@@ -57,7 +58,7 @@ var roleHarvester = {
                         creep.moveTo(link, { visualizePathStyle: { stroke: '#ffffff' } });
                     }
                 }
-                else { //----store energy exclude tower----
+                else { //----store energy----
                     var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                         filter: (structure) => {
                             return (((structure.structureType == STRUCTURE_EXTENSION
@@ -95,12 +96,12 @@ var roleHarvester = {
             //----harvest----
             else {
                 var target = Game.getObjectById(creep.memory.workingSlot);
-                var target2 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_CONTAINER) &&
-                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-                    }
-                });
+                // var target2 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                //     filter: (structure) => {
+                //         return (structure.structureType == STRUCTURE_CONTAINER) &&
+                //             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                //     }
+                // });
 
                 if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
@@ -111,7 +112,7 @@ var roleHarvester = {
                 // } else if (target2.store.getFreeCapacity(RESOURCE_ENERGY) > 0){
                 //     if (creep.transfer(target2, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){}
                 // }
-                if (creep.transfer(target2, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) { };
+                // if (creep.transfer(target2, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) { };
                 if (creep.transfer(link, RESOURCE_ENERGY) == (ERR_NOT_IN_RANGE || ERR_FULL)) { };
 
             }

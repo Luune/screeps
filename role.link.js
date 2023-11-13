@@ -34,7 +34,7 @@ var roleLink = {
         }
         //----W5N28----
         var linkd1 = Game.getObjectById('6549998cce5f31cfe3c5f31a');
-        var linkd2 = Game.getObjectById('6549c3d0dd5e82540ff210c3');
+        var linkd2 = Game.getObjectById('654df541cbb618a55ddfb95c');
         if (linkd1.store[RESOURCE_ENERGY] >= 200 && linkd2.store.getFreeCapacity(RESOURCE_ENERGY) > 200) {
             linkd1.transferEnergy(linkd2);
         }

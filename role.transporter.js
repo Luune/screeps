@@ -49,7 +49,7 @@ var roleTransporter = {
         var linksToLoot = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_LINK)
-                    && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 500;
+                    && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 400;
             }
         });
         var emptyStorage = Game.rooms[creep.memory.loc].storage;
@@ -67,7 +67,7 @@ var roleTransporter = {
                 //----store minerals----
                 for (var resourceType of Object.keys(creep.store)) {
                     // console.log('T>> carrying: ' + resourceType + ': ' + creep.store[resourceType]);
-                    if (resourceType != RESOURCE_ENERGY) {
+                    if (resourceType != RESOURCE_ENERGY && emptyStorage) {
                         creep.memory.target = emptyStorage.id;
                         creep.memory.targetResource = resourceType;
                         console.log('🚚 T>> resources to storage: ' + emptyStorage.id);
@@ -80,6 +80,7 @@ var roleTransporter = {
                             return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b);
                         });
                         creep.memory.target = emptyExtensions[0].id;
+                        // creep.memory.target = creep.pos.findClosestByPath(emptyExtensions).id;
                         creep.memory.targetResource = resourceType;
                         console.log('🚚 T>> to extension: ' + emptyExtensions[0].id);
                         break;
@@ -95,7 +96,7 @@ var roleTransporter = {
                         }
                     }
                     //----trade cost----
-                    else if (terminalEn < 5000 && terminal1.room.name == creep.memory.loc) {
+                    else if (terminalEn < 8000 && terminal1.room.name == creep.memory.loc) {
                         creep.memory.target = terminal1.id;
                         creep.memory.targetResource = resourceType;
                         console.log('🚚 T>> to terminal EN: ' + terminal1.id);
@@ -105,7 +106,7 @@ var roleTransporter = {
                     else if (containersToFill.length > 0) {
                         creep.memory.target = _.min(containersToFill, container => container.store[RESOURCE_ENERGY]).id;
                         creep.memory.targetResource = resourceType;
-                        console.log('T>> to this room container: ' + creep.memory.target);
+                        console.log('T>> to container: ' + creep.memory.target);
                         break;
                     }
                     //----fill storage----
@@ -173,6 +174,11 @@ var roleTransporter = {
                         creep.memory.targetResource = resourceType;
                     }
                 }
+                //----pick terminal extra energy----
+                else if (terminalEn > 8300) {
+                    creep.memory.target = terminal1.id;
+                    creep.memory.targetResource = RESOURCE_ENERGY;
+                }
                 //----pick link----
                 else if (linksToLoot.length > 0) {
                     let nearLink = creep.pos.findClosestByPath(linksToLoot);
@@ -189,11 +195,6 @@ var roleTransporter = {
                         creep.memory.targetResource = RESOURCE_ENERGY;
                         // console.log('🚛 T>> from container ' + maxContainer.id);
                     }
-                }
-                //----pick terminal extra energy----
-                else if (terminalEn > 5300) {
-                    creep.memory.target = terminal1.id;
-                    creep.memory.targetResource = RESOURCE_ENERGY;
                 }
                 //----pick storage----
                 else if (emptyExtensions.length > 0 && emptyStorage.store[RESOURCE_ENERGY] > 2000) {

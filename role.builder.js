@@ -102,6 +102,7 @@ var roleBuilder = {
                 }
             }
             else {
+                //----pick drop----
                 target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
                     filter: (resource) => {
                         return (resource.resourceType == RESOURCE_ENERGY)

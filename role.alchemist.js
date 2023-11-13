@@ -101,7 +101,7 @@ var roleAlchemist = {
                         console.log('⚗️ A>> to terminal: ' + resourceType);
                         break;
                     }
-                    else if (terminal && resourceType == RESOURCE_ENERGY && terminal.store[resourceType] < 5000) {
+                    else if (terminal && resourceType == RESOURCE_ENERGY && terminal.store[resourceType] < 8000) {
                         creep.memory.target = terminal.id;
                         creep.memory.targetResource = resourceType;
                         console.log('⚗️ A>> to terminal: ' + resourceType);
@@ -191,13 +191,13 @@ var roleAlchemist = {
                             console.log('🧪A>> from storage tt: ' + resourceType);
                             break;
                         }
-                        else if (terminal && resourceType == RESOURCE_ENERGY && terminal.store[resourceType] < 5000) { //----terminal need energy for transfer----
+                        else if (terminal && resourceType == RESOURCE_ENERGY && terminal.store[resourceType] < 8000) { //----terminal need energy for transfer----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
                             console.log('🧪A>> from storage tte: ' + resourceType);
                             break;
                         }
-                        else if (resourceType == factoryRes && factory.store[resourceType] < 600 && storage.store[factoryPrd] + terminal.store[factoryPrd] < 1000) { //----factory need for produce----
+                        else if (resourceType == factoryRes && factory.store[resourceType] < 600 && (storage.store[factoryPrd] + terminal.store[factoryPrd]) < (storage.store[factoryRes] + terminal.store[factoryRes])/10) { //----factory need for produce----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
                             console.log('🧪A>> from storage tf: ' + resourceType);

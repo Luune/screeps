@@ -67,8 +67,15 @@ var roleMiner = {
                     creep.moveTo(target, { visualizePathStyle: { stroke: '#ffff00' } });
                 }
                 if (target.mineralAmount == 0) {
-                    creep.memory.discharging = true;
-                    creep.say('🈵 unload');
+                    if (creep.pos.getRangeTo(creep.room.storage) <= 3) {
+                        creep.suicide();
+                    }
+                    else if (!creep.memory.path) {
+                        let target = creep.room.storage;
+                        creep.memory.path = creep.pos.findPathTo(target);
+                    }
+                    creep.moveByPath(creep.memory.path);
+                    
                 }
             }
         }
