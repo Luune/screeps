@@ -6,7 +6,7 @@ var roleTower = {
         // if (storageStorage == 0) {
         //     storageStorage = 500;
         // }
-        
+
         //----attact----
         var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if (closestHostile) {

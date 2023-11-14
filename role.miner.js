@@ -75,12 +75,10 @@ var roleMiner = {
                         creep.memory.path = creep.pos.findPathTo(target);
                     }
                     creep.moveByPath(creep.memory.path);
-                    
                 }
             }
         }
     }
-
 };
 
 module.exports = roleMiner;

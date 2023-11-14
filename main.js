@@ -32,16 +32,13 @@ module.exports.loop = function () {
     // let goodOrders = Game.market.getAllOrders(order => 
     //     order.resourceType == RESOURCE_OXIDANT &&
     //     order.type == ORDER_BUY &&
-    //     order.price > 390 &&
     //     order.remainingAmount > 1000);
-    // let bestOrder = _.sortBy(goodOrders, (o) => {
-    //             return -o.price; 
-    //     });
-    // if (bestOrder) {
+    // let bestOrder = _.max(goodOrders, (order) => order.price);
+    // if (bestOrder.price > 410) {
     //     Memory.bestOrder = bestOrder;
     //     Game.market.deal(bestOrder.id,1000,'W2N27');
     // }
-    
+
     var room1 = 'W2N27';
     var room2 = 'W1N27';
     var room3 = 'W4N28';
@@ -62,9 +59,12 @@ module.exports.loop = function () {
     // }
     roleLink.run();
 
-    //----room wise----
+
+    delete Memory.allAges;
+    Memory.allAges = {};
+    //----room wide----
     // for (var roomName in Game.rooms) {
-    for (var roomName of myRooms) {
+    for (let roomName of myRooms) {
         //----set room order----
         switch (roomName) {
             case room1:
@@ -79,28 +79,29 @@ module.exports.loop = function () {
             default:
                 var order = order1;
         }
-        var tradeAmount = 2000;
+        let tradeAmount = 2000;
         if (order) {
-            var tradeAmount = order.remainingAmount;
+            tradeAmount = order.remainingAmount;
             var tradeCost = Game.market.calcTransactionCost(tradeAmount, 'W2N27', order.roomName);
             console.log(`Order ID: ${order.id}, Resource Type: ${order.resourceType}, Room: ${order.roomName}, Price: ${order.price}, Amount: ${order.amount}, Remaining: ${order.remainingAmount}, Cost: ${tradeCost} per ${tradeAmount}`);
         }
 
-        if (Game.rooms[roomName].controller.my){
+
+        if (Game.rooms[roomName].controller.my) {
             var roomLevel = Game.rooms[roomName].controller.level;
             var enAvail = Game.rooms[roomName].energyAvailable;
         }
         //----show energy----
         let controllerProgress = Game.rooms[roomName].controller.progress;
         let controllerProgressTotal = Game.rooms[roomName].controller.progressTotal;
-        console.log('🏰 M>> >>>>>>>> Room: ' + roomName + ', level ' + roomLevel + ', ' + controllerProgress + '/' + controllerProgressTotal + ' = ' + Math.round(controllerProgress * 100 / controllerProgressTotal) + '%, energy: ' + enAvail + ' <<<<<<<<<<<<<🏰');
+        console.log('🏰 M>> >>>>>>>> Room: ' + roomName + ', level ' + roomLevel + ', ' + controllerProgress + '/' + controllerProgressTotal + ' = ' + Math.round(controllerProgress * 100 / controllerProgressTotal) + '%, spawn en: ' + enAvail + ' <<<<<<<<<<<<<🏰');
         //----count extensions storage----
-        var extensionEnergy = 0;
+        let extensionEnergy = 0;
         let extensions = Game.rooms[roomName].find(FIND_MY_STRUCTURES, {
             filter: { structureType: STRUCTURE_EXTENSION }
         });
         if (extensions.length > 0) {
-            var extensionCount = extensions.length;
+            // var extensionCount = extensions.length;
             var extensionCapacity = extensions[0].store.getCapacity(RESOURCE_ENERGY);
             // console.log(`M>> Room ${roomName} has ${extensionCount} extensions.`);
         }
@@ -112,28 +113,30 @@ module.exports.loop = function () {
         if (storage) {
             var storageStorage = storage.store.getUsedCapacity(RESOURCE_ENERGY);
         } else { storageStorage = 0; }
-        console.log('🟡 M>> stg: ' + storageStorage + ', exen: ' + extensionEnergy + '/' + extensionCount * extensionCapacity + ', ext: ' + extensionCount);
+        // console.log('🟡 M>> stg: ' + storageStorage + ', exen: ' + extensionEnergy + '/' + extensionCount * extensionCapacity + ', ext: ' + extensionCount);
         //----container storage----
         let containerEn = 0;
         let containers = Game.rooms[roomName].find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_CONTAINER;
             }
-        })
+        });
+        let containerCapacity = containers[0].store.getCapacity();
         for (let container of containers) {
             containerEn += container.store[RESOURCE_ENERGY];
         }
-        console.log('🟡 M>> Containers ' + containers.length + ', energy: ' + containerEn);
+        // console.log('🟡 M>> Containers ' + containers.length + ', energy: ' + containerEn);
+        console.log('🟡 M>> stg: ' + storageStorage + ', ext: ' + extensions.length + ', exen: ' + extensionEnergy + '/' + extensions.length * extensionCapacity + ', Ctn ' + containers.length + ', en: ' + containerEn + '/' + containerCapacity * containers.length);
 
         //----find dropped energy----
-        var droppedEnergy = Game.rooms[roomName].find(FIND_DROPPED_RESOURCES
+        let droppedEnergy = Game.rooms[roomName].find(FIND_DROPPED_RESOURCES
             , {
                 filter: (resource) => {
                     return resource.amount > 10;
                 }
             }
         );
-        var sortedEnergys = _.sortBy(droppedEnergy, (drop) => {
+        let sortedEnergys = _.sortBy(droppedEnergy, (drop) => {
             if (drop.resourceType === RESOURCE_ENERGY) {
                 return -drop.amount; // 能量数量越多，排序越靠前
             }
@@ -143,15 +146,15 @@ module.exports.loop = function () {
             // 获取资源的位置和数量
             const { x, y } = drop.pos;
             const amount = drop.amount;
-            
+
             // 在资源的位置上绘制一个圆圈
             Game.rooms[roomName].visual.circle(x, y, { radius: 0.4, fill: 'yellow', opacity: 0.5 });
-            
+
             // 在资源的位置上绘制资源的数量
             Game.rooms[roomName].visual.text(amount.toString(), x, y + 0.5, { color: 'white', font: 0.5 });
         }
         //----find tombstone----
-        var tombstones = Game.rooms[roomName].find(FIND_TOMBSTONES, {
+        let tombstones = Game.rooms[roomName].find(FIND_TOMBSTONES, {
             filter: (tombstone) => {
                 return _.sum(tombstone.store) > 0;
             },
@@ -164,7 +167,7 @@ module.exports.loop = function () {
             console.log('🟡🟡 M>> sources in TOMB: ' + tombstones[0] + ': ' + _.sum(tombstones[0].store));
         }
         //----count available harvest spots----
-        var sources = Game.rooms[roomName].find(FIND_SOURCES);
+        let sources = Game.rooms[roomName].find(FIND_SOURCES);
         for (let source of sources) {
             let countharvester = _.filter(Game.creeps, (creep) => creep.memory.workingSlot == source.id);
             console.log('⛏️ M>> ' + countharvester.length + ' creeps harvesting ' + source);
@@ -175,12 +178,12 @@ module.exports.loop = function () {
 
         //----miner----
         let minerals = Game.rooms[roomName].find(FIND_MINERALS);
-        
+
         //----call tower----
         let towers = Game.rooms[roomName].find(FIND_MY_STRUCTURES, {
             filter: { structureType: STRUCTURE_TOWER }
         });
-        var towerEn = 0;
+        let towerEn = 0;
         for (let tower of towers) {
             roleTower.run(tower, storageStorage, dismantleTarget);
             towerEn += tower.store.getUsedCapacity(RESOURCE_ENERGY);
@@ -188,35 +191,35 @@ module.exports.loop = function () {
         // console.log('M>> tower EN total: ' + towerEn);
 
         //----clear memory----
-        for (var creepName in Memory.creeps) {
+        for (let creepName in Memory.creeps) {
             if (!Game.creeps[creepName]) {
                 delete Memory.creeps[creepName];
-                console.log('🗑️ M>> Clearing non-existing creep memory:', creepName);
+                console.log('🗑️ M>> Clearing non-existing creep memory: ' + creepName);
             }
         }
 
         //----count creep by roles----
-        var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' && creep.memory.loc == roomName);
-        var totalWorkParts = _.sum(_.map(harvesters, (creep) => creep.body.filter((part) => part.type === WORK).length));
+        let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' && creep.memory.loc == roomName);
+        let totalWorkParts = _.sum(_.map(harvesters, (creep) => creep.body.filter((part) => part.type === WORK).length));
         console.log('🏷️ M>> Harvesters: ' + harvesters.length + ', WORK:' + totalWorkParts + ', energy+' + totalWorkParts * 2);
-        var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader' && creep.memory.loc == roomName);
-        var totalUpgraderParts = _.sum(_.map(upgraders, (creep) => creep.body.filter((part) => part.type === WORK).length));
+        let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader' && creep.memory.loc == roomName);
+        let totalUpgraderParts = _.sum(_.map(upgraders, (creep) => creep.body.filter((part) => part.type === WORK).length));
         console.log('🏷️ M>> Upgrader: ' + upgraders.length + ', WORK:' + totalUpgraderParts + ', energy-' + totalUpgraderParts);
-        var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder' && creep.memory.loc == roomName);
-        var totalBuildParts = _.sum(_.map(builders, (creep) => creep.body.filter((part) => part.type === WORK).length));
+        let builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder' && creep.memory.loc == roomName);
+        let totalBuildParts = _.sum(_.map(builders, (creep) => creep.body.filter((part) => part.type === WORK).length));
         console.log('🏷️ M>> Builder: ' + builders.length + ', WORK:' + totalBuildParts);
-        var transporter = _.filter(Game.creeps, (creep) => creep.memory.role == 'transporter' && creep.memory.loc == roomName);
-        var totalTransporterParts = _.sum(_.map(transporter, (creep) => creep.body.filter((part) => part.type === CARRY).length));
+        let transporter = _.filter(Game.creeps, (creep) => creep.memory.role == 'transporter' && creep.memory.loc == roomName);
+        let totalTransporterParts = _.sum(_.map(transporter, (creep) => creep.body.filter((part) => part.type === CARRY).length));
         console.log('🏷️ M>> Transporter: ' + transporter.length + ', CARRY:' + totalTransporterParts + ', cargo:' + totalTransporterParts * 50);
-        var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'claimer' && creep.memory.loc == roomName);
-        var totalClaimParts = _.sum(_.map(claimers, (creep) => creep.body.filter((part) => part.type === CLAIM).length));
+        let claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'claimer' && creep.memory.loc == roomName);
+        let totalClaimParts = _.sum(_.map(claimers, (creep) => creep.body.filter((part) => part.type === CLAIM).length));
         console.log('🏷️ M>> Claimer: ' + claimers.length + ', claims:' + totalClaimParts);
-        var fighters = _.filter(Game.creeps, (creep) => creep.memory.role == 'fighter' && creep.memory.loc == roomName);
+        let fighters = _.filter(Game.creeps, (creep) => creep.memory.role == 'fighter' && creep.memory.loc == roomName);
         console.log('🏷️ M>> Fighter: ' + fighters.length);
-        var miners = _.filter(Game.creeps, (creep) => creep.memory.role == 'miner' && creep.memory.loc == roomName);
-        var totalMineParts = _.sum(_.map(miners, (creep) => creep.body.filter((part) => part.type === WORK).length));
+        let miners = _.filter(Game.creeps, (creep) => creep.memory.role == 'miner' && creep.memory.loc == roomName);
+        let totalMineParts = _.sum(_.map(miners, (creep) => creep.body.filter((part) => part.type === WORK).length));
         console.log('🏷️ M>> Miners: ' + miners.length + ', WORK:' + totalMineParts + ', mineral+' + totalMineParts * 2);
-        var alchemists = _.filter(Game.creeps, (creep) => creep.memory.role == 'alchemist' && creep.memory.loc == roomName);
+        let alchemists = _.filter(Game.creeps, (creep) => creep.memory.role == 'alchemist' && creep.memory.loc == roomName);
         console.log('🏷️ M>> Alchemist: ' + alchemists.length);
 
         //----spawning creeps----
@@ -228,10 +231,15 @@ module.exports.loop = function () {
         //     var spawnName = 'SpawnW4N28';
         // }
         let spawnsInRoom = Game.rooms[roomName].find(FIND_MY_SPAWNS);
-        for (s of spawnsInRoom) {
-            if (s.memory.restTime > 0) {
+        for (let s of spawnsInRoom) {
+            if (Game.rooms[roomName].find(FIND_HOSTILE_CREEPS).length > 0 && towerEn < 100) {
+                s.memory.restTime = 0;
+                spawnName = s.name;
+                break;
+            }
+            else if (s.memory.restTime > 0) {
                 s.memory.restTime--;
-            } 
+            }
             else if (!s.Spawning && (s.memory.restTime == 0 || !s.memory.restTime)) { // && (s.memory.restTime == 0 || !s.memory.restTime)
                 spawnName = s.name;
                 break;
@@ -243,121 +251,121 @@ module.exports.loop = function () {
         // else if (spawn && Game.rooms[roomName].controller.my) {
         //     var spawnName = 'SpawnW4N28';
         // }
-        console.log(spawnName);
         let spawn = Game.spawns[spawnName];
-        
+        console.log(spawnName + ':' + spawn.memory.restTime);
+
         if (spawn.memory.restTime > 0) {
             // spawn.memory.restTime--;
         } else {
             // console.log('M>> ----spawner: ' + spawnName);
             if (totalWorkParts < sources.length * 5 && Game.rooms[roomName].controller.my) { //----harvester----
                 if (enAvail >= 900) {
-                    var newName = 'Harvester' + roomName + Game.time;
+                    let newName = 'Harvester' + roomName + Game.time;
                     console.log('M>> Spawning new harvester: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 183;
                 } else if (enAvail >= 700) {
-                    var newName = 'Harvester' + roomName + Game.time;
+                    let newName = 'Harvester' + roomName + Game.time;
                     console.log('M>> Spawning new harvester: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 177;
                 } else if (enAvail >= 500) {
-                    var newName = 'Harvester' + roomName + Game.time;
+                    let newName = 'Harvester' + roomName + Game.time;
                     console.log('M>> Spawning new harvester: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 171;
                 } else {
-                    var newName = 'Harvester' + roomName + Game.time;
+                    let newName = 'Harvester' + roomName + Game.time;
                     console.log('M>> Spawning new harvester: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
                 }
             }
             else if (upgraders.length < 1 && Game.rooms[roomName].controller.my) { //----upgrader----
                 if (enAvail >= 1500 && sources.length > 1) {
-                    var newName = 'Upgrader' + roomName + Game.time;
+                    let newName = 'Upgrader' + roomName + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 204;
                 } else if (enAvail >= 900) {
-                    var newName = 'Upgrader' + roomName + Game.time;
+                    let newName = 'Upgrader' + roomName + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 183;
                 } else if (enAvail >= 650) {
-                    var newName = 'Upgrader' + roomName + Game.time;
+                    let newName = 'Upgrader' + roomName + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 174;
                 } else if (enAvail >= 500) {
-                    var newName = 'Upgrader' + roomName + Game.time;
+                    let newName = 'Upgrader' + roomName + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 171;
                 } else {
-                    var newName = 'Upgrader' + roomName + Game.time;
+                    let newName = 'Upgrader' + roomName + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
                 }
             }
             else if (builders.length < 1) { //----builder----
                 if (enAvail >= 1600) {
-                    var newName = 'Builder' + roomName + Game.time;
+                    let newName = 'Builder' + roomName + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 213;
                 }
                 else if (enAvail >= 1200) {
-                    var newName = 'Builder' + roomName + Game.time;
+                    let newName = 'Builder' + roomName + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 198;
                 }
                 else if (enAvail >= 900) {
-                    var newName = 'Builder' + roomName + Game.time;
+                    let newName = 'Builder' + roomName + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 186;
                 }
                 else if (enAvail >= 500) {
-                    var newName = 'Builder' + roomName + Game.time;
+                    let newName = 'Builder' + roomName + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 171;
                 }
                 else {
-                    var newName = 'Builder' + roomName + Game.time;
+                    let newName = 'Builder' + roomName + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
                 }
             }
             else if (transporter.length < 2 && Game.rooms[roomName].controller.my) { //----transporter----
                 if (enAvail >= 1500) {
-                    var newName = 'Transporter' + roomName + Game.time;
+                    let newName = 'Transporter' + roomName + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 210;
                 } else if (enAvail >= 1000) {
-                    var newName = 'Transporter' + roomName + Game.time;
+                    let newName = 'Transporter' + roomName + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 198;
                 } else if (enAvail >= 800) {
-                    var newName = 'Transporter' + roomName + Game.time;
+                    let newName = 'Transporter' + roomName + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 186;
                 } else if (enAvail >= 600) {
-                    var newName = 'Transporter' + roomName + Game.time;
+                    let newName = 'Transporter' + roomName + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 180;
                 } else if (enAvail >= 400) {
-                    var newName = 'Transporter' + roomName + Game.time;
+                    let newName = 'Transporter' + roomName + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 174;
                 } else {
-                    var newName = 'Transporter' + roomName + Game.time;
+                    let newName = 'Transporter' + roomName + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
                 }
@@ -365,28 +373,28 @@ module.exports.loop = function () {
             //----claimer----
             if (!Game.rooms[roomName].controller.my) {
                 if (claimers.length < 1) {
-                    var newName = 'Claimer' + roomName + Game.time;
+                    let newName = 'Claimer' + roomName + Game.time;
                     console.log('M>> Spawning new claimer: ' + newName);
                     spawn.spawnCreep([CLAIM, MOVE], newName, { memory: { role: 'claimer', loc: roomName } });
-                    spawn.memory.restTime = 150;
+                    spawn.memory.restTime = 156;
                 }
             }
             //----fighter----
             if (Game.rooms[roomName].find(FIND_HOSTILE_CREEPS).length > 0 && towerEn < 100) {
                 if (fighters.length < 1) {
                     if (enAvail >= 550) {
-                        var newName = 'Fighter' + roomName + Game.time;
+                        let newName = 'Fighter' + roomName + Game.time;
                         console.log('M>> Spawning new fighter: ' + newName);
                         spawn.spawnCreep([TOUGH, TOUGH, TOUGH, MOVE, MOVE, RANGED_ATTACK, MOVE, MOVE, RANGED_ATTACK], newName, { memory: { role: 'fighter', loc: roomName } });
                         // Game.spawns['SpawnW4N28'].spawnCreep([MOVE, MOVE, ATTACK, MOVE, MOVE, ATTACK, ATTACK, MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK], 'FighterW5N28', { memory: { role: 'fighter', loc: 'W4N28', destiny:'W5N28' } });
                     } else {
-                        var newName = 'Fighter' + roomName + Game.time;
+                        let newName = 'Fighter' + roomName + Game.time;
                         console.log('M>> Spawning new fighter: ' + newName);
                         spawn.spawnCreep([RANGED_ATTACK, MOVE], newName, { memory: { role: 'fighter', loc: roomName } });
                     }
                 }
             }
-            
+
             // 遍历每个矿物
             for (let mineral of minerals) {
                 // 判断矿物上是否已经建造了Extractor
@@ -395,16 +403,16 @@ module.exports.loop = function () {
                     console.log(`M>> 矿物 ${mineral.mineralType} 可以采集 ${mineral.mineralAmount}`);
                     if (miners.length < 1) {
                         if (enAvail >= 1600) {
-                            var newName = 'Miner' + roomName + Game.time;
+                            let newName = 'Miner' + roomName + Game.time;
                             console.log('M>> Spawning new miner: ' + newName);
                             spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'miner', loc: roomName } });
-                           spawn.memory.restTime = 150;
+                            spawn.memory.restTime = 195;
                         }
                         else if (enAvail >= 800) {
-                            var newName = 'Miner' + roomName + Game.time;
+                            let newName = 'Miner' + roomName + Game.time;
                             console.log('M>> Spawning new miner: ' + newName);
                             spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'miner', loc: roomName } });
-                            spawn.memory.restTime = 150;
+                            spawn.memory.restTime = 177;
                         }
                     }
                 } else {
@@ -418,15 +426,16 @@ module.exports.loop = function () {
                 }
             });
             if (alchemists.length < 1 && labs.length > 0) {
-                var newName = 'Alchemist' + roomName + Game.time;
+                let newName = 'Alchemist' + roomName + Game.time;
                 console.log('M>> Spawning new miner: ' + newName);
                 spawn.spawnCreep([CARRY, CARRY, MOVE], newName, { memory: { role: 'alchemist', loc: roomName } });
+                spawn.memory.restTime = 159;
             }
         }
 
         //----show spawning----
         if (spawn.spawning) {
-            var spawningCreep = Game.creeps[spawn.spawning.name];
+            let spawningCreep = Game.creeps[spawn.spawning.name];
             spawn.room.visual.text(
                 '🛠️' + spawningCreep.memory.role,
                 spawn.pos.x + 1,
@@ -437,10 +446,12 @@ module.exports.loop = function () {
         //----find oldest creep----
         var age = 1500;
         //----call creeps to work----
-        for (var creepName in Game.creeps) {
-            var creep = Game.creeps[creepName];
+        for (let creepName in Game.creeps) {
+            let creep = Game.creeps[creepName];
             //----find oldest creep----
             let life = creep.ticksToLive;
+            if (creep.memory.loc == roomName) { Memory.allAges[creepName] = life; }
+
             if (life < age) {
                 age = life;
                 var oldest = creep;
@@ -471,9 +482,10 @@ module.exports.loop = function () {
                 let result = roleAlchemist.run(creep, roomName, order, tradeAmount, tradeCost);
             }
         }
-    } //----room wise end----
+        // Memory.allAges = allAges;
+    } //----room wide end----
 
-    //----reserve room wise----
+    //----reserve room wide----
     // for (var roomName of reserveRooms) {
     //     //----count creep by roles----
     //     var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'claimer' && creep.memory.loc == roomName);
@@ -514,8 +526,8 @@ module.exports.loop = function () {
     //         }
     //     }
     // }
-    //----reserve room wise end----
-    
+    //----reserve room wide end----
+
     console.log(`⚰️ M>>>> ${oldest} has ${age} ticks life>>>>`);
 
     //----test----

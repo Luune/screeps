@@ -39,19 +39,15 @@ var roleUpgrader = {
             var containerIds = containersWithEnergy.map(container => container.id);
             creep.memory.containerIds = containerIds;
         }
-        
+
         //----action----
         if (creep.memory.loc != creep.room.name) {
             creep.moveTo(new RoomPosition(25, 25, creep.memory.loc), { reusePath: 20, visualizePathStyle: { stroke: '#ff3300' } });
         } else {
             if (creep.memory.upgrading) { //----upgrade----
-                
+
                 if (creep.upgradeController(Game.rooms[creep.memory.loc].controller) == ERR_NOT_IN_RANGE) {
-                    // if (!creep.memory.path) {
-                        
-                    // } else {
-                        creep.moveByPath(creep.memory.path);
-                    // }
+                    creep.moveByPath(creep.memory.path);
                 }
             }
             //----find energy----
@@ -60,16 +56,6 @@ var roleUpgrader = {
                     delete creep.memory.target;
                     delete creep.memory.path;
                 }
-                //----pick from link/container/storage----
-                // let targets = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
-                //     filter: (structure) => {
-                //         return ((structure.structureType == STRUCTURE_LINK) &&
-                //             structure.store[RESOURCE_ENERGY] > 0)
-                //             || ((structure.structureType == STRUCTURE_CONTAINER) &&
-                //                 structure.store[RESOURCE_ENERGY] > 0);
-                //     }
-                // });
-                
                 // 获取存储在memory中的容器id列表
                 const containerIds = creep.memory.containerIds;
                 // 遍历容器id列表
@@ -84,9 +70,8 @@ var roleUpgrader = {
                     if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         if (!creep.memory.path) {
                             creep.memory.path = creep.pos.findPathTo(target);
-                        } else {
-                            creep.moveByPath(creep.memory.path);
                         }
+                        creep.moveByPath(creep.memory.path);
                         if (creep.memory.path) {
                             // 获取creep的路线
                             var path = creep.memory.path;
@@ -103,89 +88,52 @@ var roleUpgrader = {
                         delete creep.memory.target;
                         delete creep.memory.path;
                     }
-                
                 else {
-                    // let targets = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
-                    //     filter: (structure) => {
-                    //         return ((structure.structureType == STRUCTURE_STORAGE) &&
-                    //                 structure.store[RESOURCE_ENERGY] >= 50);
-                    //     }
-                    // });
-                    // if (targets.length > 0) {
-                    //     var target = creep.pos.findClosestByPath(targets);
-                    //     // console.log('U>> pick from link: ' + target);
-                    //     if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    //         if (!creep.memory.path) {
-                    //             creep.memory.path = creep.pos.findPathTo(target);
-                    //         } else {
-                    //             creep.moveByPath(creep.memory.path);
-                    //         }
-                    //         if (creep.memory.path) {
-                    //             // 获取creep的路线
-                    //             var path = creep.memory.path;
-                    //             // 获取下一步位置
-                    //             var nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
-                    //             // 在下一步位置查找所有对象
-                    //             var objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
-                    //             if (objects.length > 0) {
-                    //                 delete creep.memory.path;
-                    //             }
-                    //         }
-                    //     }
-                    //     else {
-                    //         delete creep.memory.target;
-                    //         delete creep.memory.path;
-                    //     }
-                    // }
-                    // else {
-                        //----loot----
-                        target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
-                            filter: (resource) => {
-                                return (resource.resourceType == RESOURCE_ENERGY)
-                                    && (resource.amount >= 10);
+                    //----loot----
+                    target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
+                        filter: (resource) => {
+                            return (resource.resourceType == RESOURCE_ENERGY)
+                                && (resource.amount >= 10);
+                        }
+                    });
+                    if (target) {
+                        // console.log('U>> loot: ' + target);
+                        if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
+                            if (!creep.memory.path) {
+                                creep.memory.path = creep.pos.findPathTo(target);
                             }
-                        });
-                        if (target) {
-                            // console.log('U>> loot: ' + target);
-                            if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
-                                if (!creep.memory.path) {
-                                    creep.memory.path = creep.pos.findPathTo(target);
-                                } else {
-                                    creep.moveByPath(creep.memory.path);
-                                    creep.say('⚡ E:' + target.amount);
+                            creep.moveByPath(creep.memory.path);
+                            creep.say('⚡ E:' + target.amount);
+                            if (creep.memory.path) {
+                                // 获取creep的路线
+                                var path = creep.memory.path;
+                                // 获取下一步位置
+                                var nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                // 在下一步位置查找所有对象
+                                var objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
+                                if (objects.length > 0) {
+                                    delete creep.memory.path;
                                 }
-                                if (creep.memory.path) {
-                                    // 获取creep的路线
-                                    var path = creep.memory.path;
-                                    // 获取下一步位置
-                                    var nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
-                                    // 在下一步位置查找所有对象
-                                    var objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
-                                    if (objects.length > 0) {
-                                        delete creep.memory.path;
-                                    }
-                                }
-                            }
-                            else {
-                                delete creep.memory.path;
                             }
                         }
                         else {
-                            //----harvest by self----
-                            target = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
-                            // console.log('U>> harvest: ' + target);
-                            if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
-                                if (!creep.memory.path) {
-                                    creep.memory.path = creep.pos.findPathTo(target);
-                                } else {
-                                    creep.moveByPath(creep.memory.path);
-                                }
-                            }
-                            else {
-                                delete creep.memory.path;
-                            }
+                            delete creep.memory.path;
                         }
-                    // }
+                    }
+                    else {
+                        //----harvest by self----
+                        target = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+                        // console.log('U>> harvest: ' + target);
+                        if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
+                            if (!creep.memory.path) {
+                                creep.memory.path = creep.pos.findPathTo(target);
+                            }
+                            creep.moveByPath(creep.memory.path);
+                        }
+                        else {
+                            delete creep.memory.path;
+                        }
+                    }
                 }
             }
         }

@@ -1,6 +1,6 @@
 var roleTransporter = {
     run: function (creep, roomName, sortedEnergys, tombstones, order) {
-         // console.log('T>> dropped energy: '+sortedEnergys);
+        // console.log('T>> dropped energy: '+sortedEnergys);
         //----set status----
         if (creep.memory.transporting && creep.store.getUsedCapacity() == 0) {
             creep.memory.transporting = false;
@@ -141,7 +141,7 @@ var roleTransporter = {
                     //     }
                     // }
                     // creep.moveByPath(creep.memory.path);
-                    creep.moveTo(target, {reusePath: 5, visualizePathStyle: { stroke: '#00ff00' }});
+                    creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#00ff00' } });
                     creep.say('🚚 ' + target.pos.x + ',' + target.pos.y);
                 }
                 else {
@@ -227,7 +227,7 @@ var roleTransporter = {
                     //     }
                     // }
                     // creep.moveByPath(creep.memory.path);
-                    creep.moveTo(target, {reusePath: 5, visualizePathStyle: { stroke: '#00ff00' }});
+                    creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#00ff00' } });
                     creep.say('🚛' + target.pos.x + ',' + target.pos.y);
                 }
                 else {
