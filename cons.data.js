@@ -36,7 +36,7 @@ var consData = {
             },
             'lab3': {
                 'id': '651e6d6686831591a7847dcf',
-                'resource': 'GO' //----for revert reaction----
+                'resource': 'KO' //----for revert reaction----
             },
             'lab4': {
                 'id': '654b9e712fa32d766f7eee96',
@@ -52,8 +52,8 @@ var consData = {
             },
             'factory1': {
                 'id': '652cec5465fe9b42500b7f10',
-                'resource': RESOURCE_OXYGEN, //RESOURCE_OXYGEN, RESOURCE_LEMERGIUM, RESOURCE_ZYNTHIUM, RESOURCE_ENERGY
-                'prod': RESOURCE_OXIDANT //RESOURCE_OXIDANT, RESOURCE_LEMERGIUM_BAR, RESOURCE_ZYNTHIUM_BAR, RESOURCE_BATTERY
+                'resource': RESOURCE_ENERGY, //RESOURCE_OXYGEN, RESOURCE_LEMERGIUM, RESOURCE_ZYNTHIUM, RESOURCE_ENERGY
+                'prod': RESOURCE_BATTERY //RESOURCE_OXIDANT, RESOURCE_LEMERGIUM_BAR, RESOURCE_ZYNTHIUM_BAR, RESOURCE_BATTERY
             },
             //----W1N27----
             'labMb': { //----for miner to drop----

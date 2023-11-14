@@ -255,7 +255,7 @@ var roleAlchemist = {
                             console.log('🧪A>> from terminal 2: ' + resourceType);
                             break;
                         }
-                        else if (resourceType == terminalRes && terminal.store[resourceType] > 10100) { //----remove extra terminal resource----
+                        else if (resourceType == terminalRes && terminal.store[resourceType] > 10200) { //----remove extra terminal resource----
                             creep.memory.target = terminal.id;
                             creep.memory.targetResource = resourceType;
                             console.log('🧪A>> from terminal 2: ' + resourceType);
