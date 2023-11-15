@@ -65,7 +65,7 @@ var roleTransporter = {
                 delete creep.memory.targetResource;
                 delete creep.memory.path;
                 //----store minerals----
-                for (var resourceType of Object.keys(creep.store)) {
+                for (let resourceType of Object.keys(creep.store)) {
                     // console.log('T>> carrying: ' + resourceType + ': ' + creep.store[resourceType]);
                     if (resourceType != RESOURCE_ENERGY && emptyStorage) {
                         creep.memory.target = emptyStorage.id;

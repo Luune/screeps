@@ -36,8 +36,7 @@ var roleUpgrader = {
             // 按照与controller的距离进行排序
             containersWithEnergy.sort((a, b) => a.pos.getRangeTo(Game.rooms[creep.memory.loc].controller) - b.pos.getRangeTo(Game.rooms[creep.memory.loc].controller));
             // 将容器的id写入creep的memory中
-            var containerIds = containersWithEnergy.map(container => container.id);
-            creep.memory.containerIds = containerIds;
+            creep.memory.containerIds = containersWithEnergy.map(container => container.id);
         }
 
         //----action----
@@ -57,10 +56,10 @@ var roleUpgrader = {
                     delete creep.memory.path;
                 }
                 // 获取存储在memory中的容器id列表
-                const containerIds = creep.memory.containerIds;
+                var containerIds = creep.memory.containerIds;
                 // 遍历容器id列表
                 for (let id of containerIds) {
-                    const container = Game.getObjectById(id);
+                    let container = Game.getObjectById(id);
                     if (container && container.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
                         var target = container;
                         break; // 找到第一个满足条件的容器后立即停止遍历

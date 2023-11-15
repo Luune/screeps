@@ -15,7 +15,7 @@ var roleHarvester = {
         }
         //sign working slot
         if (!creep.memory.workingSlot) {
-            for (source of sources) {
+            for (let source of sources) {
                 let harvesterOnS = _.filter(Game.creeps, (creep) => creep.memory.workingSlot == source.id && creep.memory.role == 'harvester');
                 let totalWorkParts = _.sum(_.map(harvesterOnS, (creep) => creep.body.filter((part) => part.type === WORK).length));
                 console.log('⛏️ H>> Source:' + source.id + ',assigned:' + harvesterOnS + ',' + totalWorkParts);
