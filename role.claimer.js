@@ -41,7 +41,7 @@ var roleClaimer = {
             else if (result == ERR_GCL_NOT_ENOUGH) {
                 creep.reserveController(controller);
             }
-            else if (controller.owner.username != 'SybrrLuune') {
+            else if (controller.owner && controller.owner.username != 'SybrrLuune') {
                 if (creep.attackController(controller) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(controller, { visualizePathStyle: { stroke: '#aa0066' } });
                     creep.say('AttCon');

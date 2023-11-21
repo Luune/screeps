@@ -37,7 +37,7 @@ var roleTransporter = {
         var containersToFill = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_CONTAINER
-                    && structure.store.getFreeCapacity(RESOURCE_ENERGY) >= 1000;
+                    && structure.store.getFreeCapacity(RESOURCE_ENERGY) >= 800;
             }
         });
         var containersToLoot = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
