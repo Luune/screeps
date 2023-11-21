@@ -11,6 +11,9 @@ var roleMelee = {
 
     /** @param {Creep} creep **/
     run: function (creep, roomName, dismantleTargetId) {
+        if (!creep.memory.destiny) {
+            creep.memory.destiny = creep.memory.loc; //creep.memory.loc;
+        }
         if (!Memory.whitelist) {
             Memory.whitelist = {};
         }
@@ -18,7 +21,7 @@ var roleMelee = {
         // Memory.whitelist['Fatoribo'] = true;
 
         // console.log('⚔️ F: whitelist' + Memory.whiteList);
-        // creep.memory.destiny = 'W5N28';
+        creep.memory.destiny = 'W3N28';
         if (creep.room.name != creep.memory.destiny) {
             creep.say('F' + creep.memory.destiny);
             creep.moveTo(new RoomPosition(25, 25, creep.memory.destiny));
@@ -59,15 +62,15 @@ var roleMelee = {
                 else { //----heal----
                     var closestWoundedCreep = creep.pos.findClosestByRange(FIND_MY_CREEPS,
                         { filter: (creep) => creep.hits < creep.hitsMax });
-                    creep.say('💉 ' + closestWoundedCreep);
                     if (closestWoundedCreep) {
+                        creep.say('💉 ' + closestWoundedCreep);
                         creep.moveTo(closestWoundedCreep, { visualizePathStyle: { stroke: '#ff00ff' } });
                         if (creep.pos.isNearTo(closestWoundedCreep)) { creep.heal(closestWoundedCreep); }
                         else { creep.rangedHeal(closestWoundedCreep); }
                     }
                     
                     else {
-                        creep.moveTo(Game.rooms[creep.memory.loc].controller, { range: 5, visualizePathStyle: { stroke: '#ff00ff' } });
+                        creep.moveTo(Game.rooms[creep.memory.destiny].controller, { range: 5, visualizePathStyle: { stroke: '#ff00ff' } });
                     }
                 }
             }

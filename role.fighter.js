@@ -82,15 +82,15 @@ var roleFighter = {
                 else { //----heal----
                     var closestWoundedCreep = creep.pos.findClosestByRange(FIND_MY_CREEPS,
                         { filter: (creep) => creep.hits < creep.hitsMax });
-                    creep.say('💉 ' + closestWoundedCreep);
                     if (closestWoundedCreep) {
+                        creep.say('💉 ' + closestWoundedCreep);
                         creep.moveTo(closestWoundedCreep, { visualizePathStyle: { stroke: '#ff00ff' } });
                         if (creep.pos.isNearTo(closestWoundedCreep)) { creep.heal(closestWoundedCreep); }
                         else { creep.rangedHeal(closestWoundedCreep); }
                     }
                     
                     else {
-                        creep.moveTo(Game.rooms[creep.memory.loc].controller, { range: 5, visualizePathStyle: { stroke: '#ff00ff' } });
+                        creep.moveTo(Game.rooms[creep.memory.destiny].controller, { range: 6, visualizePathStyle: { stroke: '#ff00ff' } });
                     }
                 }
             }

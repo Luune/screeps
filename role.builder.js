@@ -27,6 +27,21 @@ var roleBuilder = {
             creep.moveTo(new RoomPosition(25, 25, creep.memory.loc), { reusePath: 20, visualizePathStyle: { stroke: '#0099ff' } });
         }
         else if (creep.memory.building) {
+            //----create preserved construction site----
+            if (creep.room.find(FIND_STRUCTURES,{filter:(structure)=>{return structure.structureType==STRUCTURE_SPAWN}})) {
+                for (let flagName in Game.flags) {
+                    let flag = Game.flags[flagName];
+                    if (flag.name.includes('Spawn')) {
+                        let result = flag.pos.createConstructionSite(STRUCTURE_SPAWN, flag.name);
+                        if (result === OK) {
+                            console.log('Construction site created at flag position');
+                            flag.remove;
+                        } else {
+                            console.log('Failed to create construction site');
+                        }
+                    }
+                }
+            }
             //----build----
             var target = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
             if (target) {

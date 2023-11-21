@@ -11,6 +11,7 @@ var roleAlchemist = require('role.alchemist');
 var roleLink = require('role.link');
 // var roleDoctor = require('role.doctor');
 var roleMelee = require('role.melee');
+var roleScout = require('role.scout');
 
 module.exports.loop = function () {
     console.log('🔻~~~~~~~~~~~~~~~~~~~~~~Tick~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~🔻');
@@ -30,7 +31,7 @@ module.exports.loop = function () {
 
     // Game.market.createOrder({ type: ORDER_SELL, resourceType: RESOURCE_UTRIUM_HYDRIDE, price: 100, totalAmount: 1000, roomName: "W2N27" });
     // Game.market.createOrder({ type: ORDER_BUY, resourceType: RESOURCE_HYDROGEN, price: 111, totalAmount: 1000, roomName: "W2N27" });
-    // Game.rooms['W5N28'].terminal.send('energy', 1000, 'W4N28');
+    // Game.rooms['W5N28'].terminal.send('energy', 5000, 'W4N28');
 
     // let goodOrders = Game.market.getAllOrders(order => 
     //     order.resourceType == RESOURCE_OXIDANT &&
@@ -53,7 +54,7 @@ module.exports.loop = function () {
     myRooms.push(room2);
     myRooms.push(room3);
     myRooms.push(room4);
-    // myRooms.push(room5);
+    myRooms.push(room5);
     reserveRooms.push(room5);
     // console.log(myRooms);
     var dismantleTarget = ''; //----recycle some buildings for builder----
@@ -67,6 +68,7 @@ module.exports.loop = function () {
     delete Memory.rooms;
     //----room wide----
     for (let roomName of myRooms) {
+        let thisRoom = Game.rooms[roomName];
         //----set room order----
         switch (roomName) {
             case room1:
@@ -91,19 +93,17 @@ module.exports.loop = function () {
             console.log(`Order ID: ${order.id}, Resource Type: ${order.resourceType}, Room: ${order.roomName}, Price: ${order.price}, Amount: ${order.amount}, Remaining: ${order.remainingAmount}, Cost: ${tradeCost} per ${tradeAmount}`);
         }
 
-        let thisRoom = Game.rooms[roomName];
-        console.log(roomName + thisRoom);
-        if (Game.rooms[roomName] && Game.rooms[roomName].controller.my) {
-            var roomLevel = Game.rooms[roomName].controller.level;
-            var enAvail = Game.rooms[roomName].energyAvailable;
+        if (thisRoom && thisRoom.controller.my) {
+            var roomLevel = thisRoom.controller.level;
+            var enAvail = thisRoom.energyAvailable;
         }
         //----show energy----
-        let controllerProgress = Game.rooms[roomName].controller.progress;
-        let controllerProgressTotal = Game.rooms[roomName].controller.progressTotal;
-        console.log('🏰 M>> >>>>>>>> Room: ' + roomName + ', level ' + roomLevel + ', ' + controllerProgress + '/' + controllerProgressTotal + ' = ' + Math.round(controllerProgress * 100 / controllerProgressTotal) + '%, spawn en: ' + enAvail + ' <<<<<<<<<<<<<🏰');
+        let controllerProgress = thisRoom.controller.progress;
+        let controllerProgressTotal = thisRoom.controller.progressTotal;
+        console.log('🏰 M>>>>>>>>>> Room: ' + roomName + ', level ' + roomLevel + ', ' + controllerProgress + '/' + controllerProgressTotal + ' = ' + Math.round(controllerProgress * 100 / controllerProgressTotal) + '%, spawn en: ' + enAvail + ' <<<<<<<<<<🏰');
         //----count extensions storage----
         let extensionEnergy = 0;
-        let extensions = Game.rooms[roomName].find(FIND_MY_STRUCTURES, {
+        let extensions = thisRoom.find(FIND_MY_STRUCTURES, {
             filter: { structureType: STRUCTURE_EXTENSION }
         });
         if (extensions.length > 0) {
@@ -115,14 +115,14 @@ module.exports.loop = function () {
             extensionEnergy += extension.store.getUsedCapacity(RESOURCE_ENERGY);
         }
         //----storage of storage----
-        let storage = Game.rooms[roomName].storage;
+        let storage = thisRoom.storage;
         if (storage) {
             var storageStorage = storage.store.getUsedCapacity(RESOURCE_ENERGY);
         } else { storageStorage = 0; }
         // console.log('🟡 M>> stg: ' + storageStorage + ', exen: ' + extensionEnergy + '/' + extensionCount * extensionCapacity + ', ext: ' + extensionCount);
         //----container storage----
         let containerEn = 0;
-        let containers = Game.rooms[roomName].find(FIND_STRUCTURES, {
+        let containers = thisRoom.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_CONTAINER;
             }
@@ -138,7 +138,7 @@ module.exports.loop = function () {
         }
         
         //----find dropped energy----
-        let droppedEnergy = Game.rooms[roomName].find(FIND_DROPPED_RESOURCES
+        let droppedEnergy = thisRoom.find(FIND_DROPPED_RESOURCES
             , {
                 filter: (resource) => {
                     return resource.amount > 10;
@@ -157,26 +157,26 @@ module.exports.loop = function () {
             const amount = drop.amount;
 
             // 在资源的位置上绘制一个圆圈
-            Game.rooms[roomName].visual.circle(x, y, { radius: 0.4, fill: 'yellow', opacity: 0.5 });
+            thisRoom.visual.circle(x, y, { radius: 0.4, fill: 'yellow', opacity: 0.5 });
 
             // 在资源的位置上绘制资源的数量
-            Game.rooms[roomName].visual.text(amount.toString(), x, y + 0.5, { color: 'white', font: 0.5 });
+            thisRoom.visual.text(amount.toString(), x, y + 0.5, { color: 'white', font: 0.5 });
         }
         //----find tombstone----
-        let tombstones = Game.rooms[roomName].find(FIND_TOMBSTONES, {
+        let tombstones = thisRoom.find(FIND_TOMBSTONES, {
             filter: (tombstone) => {
                 return _.sum(tombstone.store) > 0;
             },
             // 按存储量从大到小排序
             sort: (a, b) => _.sum(b.store) - _.sum(a.store)
-        }).concat(Game.rooms[roomName].find(FIND_RUINS, {
+        }).concat(thisRoom.find(FIND_RUINS, {
             filter: ruin => ruin.store.getUsedCapacity() > 0
         }));
         if (tombstones.length > 0) {
             console.log('🟡🟡 M>> sources in TOMB: ' + tombstones[0] + ': ' + _.sum(tombstones[0].store));
         }
         //----count available harvest spots----
-        let sources = Game.rooms[roomName].find(FIND_SOURCES);
+        let sources = thisRoom.find(FIND_SOURCES);
         for (let source of sources) {
             let countharvester = _.filter(Game.creeps, (creep) => creep.memory.workingSlot == source.id);
             console.log('⛏️ M>> ' + countharvester.length + ' creeps harvesting ' + source);
@@ -186,10 +186,10 @@ module.exports.loop = function () {
         // console.log(sourceSpot[2].id);
 
         //----miner----
-        let minerals = Game.rooms[roomName].find(FIND_MINERALS);
+        let minerals = thisRoom.find(FIND_MINERALS);
 
         //----call tower----
-        let towers = Game.rooms[roomName].find(FIND_MY_STRUCTURES, {
+        let towers = thisRoom.find(FIND_MY_STRUCTURES, {
             filter: { structureType: STRUCTURE_TOWER }
         });
         let towerEn = 0;
@@ -224,22 +224,22 @@ module.exports.loop = function () {
         let totalMineParts = _.sum(_.map(miners, (creep) => creep.body.filter((part) => part.type === WORK).length));
         let alchemists = _.filter(Game.creeps, (creep) => creep.memory.role == 'alchemist' && creep.memory.loc == roomName);
         console.log('🏷️ M>> Harvesters: ' + harvesters.length + ', WORK:' + totalWorkParts + ', energy+' + totalWorkParts * 2);
-        console.log('🏷️ M>> Upgrader: ' + upgraders.length + ', WORK:' + totalUpgraderParts + ', energy-' + totalUpgraderParts + ' |️ M>> Claimer: ' + claimers.length + ', claims:' + totalClaimParts);
+        console.log('🏷️ M>> Upgrader: ' + upgraders.length + ', WORK:' + totalUpgraderParts + ', energy-' + totalUpgraderParts + ' |️ M>> Claimer: ' + claimers.length);
         console.log('🏷️ M>> Transporter: ' + transporter.length + ', CARRY:' + totalTransporterParts + ', cargo:' + totalTransporterParts * 50);
-        console.log('🏷️ M>> Builder: ' + builders.length + ', WORK:' + totalBuildParts + ' |️ M>> Fighter: ' + fighters.length + ' | M>> Melee: ' + melees.length);
+        console.log('🏷️ M>> Builder: ' + builders.length + ', WORK:' + totalBuildParts + ' |️ Fighter: ' + fighters.length + ' | Melee: ' + melees.length);
         console.log('🏷️ M>> Miners: ' + miners.length + ', WORK:' + totalMineParts + ' |️ M>> Alchemist: ' + alchemists.length);
 
         //----spawning creeps----
         let spawnName = '';
-        // var spawn = Game.rooms[roomName].find(FIND_MY_SPAWNS)[0];
-        // if (spawn && Game.rooms[roomName].controller.my) {
+        // var spawn = thisRoom.find(FIND_MY_SPAWNS)[0];
+        // if (spawn && thisRoom.controller.my) {
         //     var spawnName = spawn.name;
         // } else {
         //     var spawnName = 'SpawnW4N28';
         // }
-        let spawnsInRoom = Game.rooms[roomName].find(FIND_MY_SPAWNS);
+        let spawnsInRoom = thisRoom.find(FIND_MY_SPAWNS);
         for (let s of spawnsInRoom) {
-            if (Game.rooms[roomName].find(FIND_HOSTILE_CREEPS).length > 0 && towerEn < 100) {
+            if (thisRoom.find(FIND_HOSTILE_CREEPS).length > 0 && towerEn < 100) {
                 s.memory.restTime = 0;
                 spawnName = s.name;
                 break;
@@ -258,7 +258,7 @@ module.exports.loop = function () {
         else if (!spawnName || spawnName == '') {
             spawnName = spawnsInRoom[0].name;
         }
-        // else if (spawn && Game.rooms[roomName].controller.my) {
+        // else if (spawn && thisRoom.controller.my) {
         //     var spawnName = 'SpawnW4N28';
         // }
         let spawn = Game.spawns[spawnName];
@@ -268,143 +268,157 @@ module.exports.loop = function () {
             // spawn.memory.restTime--;
         } else {
             // console.log('M>> ----spawner: ' + spawnName);
-            if (totalWorkParts < sources.length * 5 && Game.rooms[roomName].controller.my) { //----harvester----
+            if (totalWorkParts < sources.length * 5 && thisRoom.controller.my) { //----harvester----
                 if (enAvail >= 900) {
-                    let newName = roomName + 'Hv' + Game.time;
+                    let newName = roomName + '-Hv-' + Game.time;
                     console.log('M>> Spawning new harvester: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
                     spawn.memory.restTime = 183;
                 } else if (enAvail >= 700) {
-                    let newName = roomName + 'Hv' + Game.time;
+                    let newName = roomName + '-Hv-' + Game.time;
                     console.log('M>> Spawning new harvester: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
                     spawn.memory.restTime = 177;
                 } else if (enAvail >= 500) {
-                    let newName = roomName + 'Hv' + Game.time;
+                    let newName = roomName + '-Hv-' + Game.time;
                     console.log('M>> Spawning new harvester: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
                     spawn.memory.restTime = 171;
                 } else {
-                    let newName = roomName + 'Hv' + Game.time;
+                    let newName = roomName + '-Hv-' + Game.time;
                     console.log('M>> Spawning new harvester: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
                 }
             }
-            else if (upgraders.length < 1 && Game.rooms[roomName].controller.my) { //----upgrader----
+            else if (upgraders.length < 1 && thisRoom.controller.my) { //----upgrader----
                 if (enAvail >= 1500 && sources.length > 1) {
-                    let newName = roomName + 'Up' + Game.time;
+                    let newName = roomName + '-Up-' + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
                     spawn.memory.restTime = 204;
                 } else if (enAvail >= 900) {
-                    let newName = roomName + 'Up' + Game.time;
+                    let newName = roomName + '-Up-' + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
                     spawn.memory.restTime = 183;
                 } else if (enAvail >= 650) {
-                    let newName = roomName + 'Up' + Game.time;
+                    let newName = roomName + '-Up-' + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
                     spawn.memory.restTime = 174;
                 } else if (enAvail >= 500) {
-                    let newName = roomName + 'Up' + Game.time;
+                    let newName = roomName + '-Up-' + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
                     spawn.memory.restTime = 171;
                 } else {
-                    let newName = roomName + 'Up' + Game.time;
+                    let newName = roomName + '-Up-' + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
                 }
             }
-            else if (builders.length < 1 && Game.rooms[roomName].controller.my) { //----builder----
+            else if (builders.length < 1) { //----builder----
                 if (enAvail >= 1600) {
-                    let newName = roomName + 'Bd' + Game.time;
+                    let newName = roomName + '-Bd-' + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
                     spawn.memory.restTime = 213;
                 }
                 else if (enAvail >= 1200) {
-                    let newName = roomName + 'Bd' + Game.time;
+                    let newName = roomName + '-Bd-' + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
                     spawn.memory.restTime = 198;
                 }
                 else if (enAvail >= 900) {
-                    let newName = roomName + 'Bd' + Game.time;
+                    let newName = roomName + '-Bd-' + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
                     spawn.memory.restTime = 186;
                 }
                 else if (enAvail >= 500) {
-                    let newName = roomName + 'Bd' + Game.time;
+                    let newName = roomName + '-Bd-' + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
                     spawn.memory.restTime = 171;
                 }
                 else {
-                    let newName = roomName + 'Bd' + Game.time;
+                    let newName = roomName + '-Bd-' + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
                 }
             }
-            else if (transporter.length < 2 && Game.rooms[roomName].controller.my) { //----transporter----
+            else if (transporter.length < 2 && thisRoom.controller.my) { //----transporter----
                 if (enAvail >= 1500) {
-                    let newName = roomName + 'Tr' + Game.time;
+                    let newName = roomName + '-Tr-' + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
                     spawn.memory.restTime = 210;
                 } else if (enAvail >= 1000) {
-                    let newName = roomName + 'Tr' + Game.time;
+                    let newName = roomName + '-Tr-' + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
                     spawn.memory.restTime = 198;
                 } else if (enAvail >= 800) {
-                    let newName = roomName + 'Tr' + Game.time;
+                    let newName = roomName + '-Tr-' + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
                     spawn.memory.restTime = 186;
                 } else if (enAvail >= 600) {
-                    let newName = roomName + 'Tr' + Game.time;
+                    let newName = roomName + '-Tr-' + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
                     spawn.memory.restTime = 180;
                 } else if (enAvail >= 400) {
-                    let newName = roomName + 'Tr' + Game.time;
+                    let newName = roomName + '-Tr-' + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
                     spawn.memory.restTime = 174;
                 } else {
-                    let newName = roomName + 'Tr' + Game.time;
+                    let newName = roomName + '-Tr-' + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
                 }
             }
             //----claimer----
-            if (!Game.rooms[roomName].controller.my) {
+            if (!thisRoom.controller.my) {
                 if (claimers.length < 1) {
-                    let newName = roomName + 'Cl' + Game.time;
+                    let newName = roomName + '-Cl-' + Game.time;
                     console.log('M>> Spawning new claimer: ' + newName);
                     spawn.spawnCreep([CLAIM, MOVE], newName, { memory: { role: 'claimer', loc: roomName } });
                     spawn.memory.restTime = 156;
                 }
             }
             //----fighter----
-            if ((Game.rooms[roomName].find(FIND_HOSTILE_CREEPS).length > 0 || Game.rooms[roomName].find(FIND_STRUCTURES, {filter: (structure) => {return (structure.structureType == STRUCTURE_INVADER_CORE)}})) && towerEn < 100) {
+            if ((thisRoom.find(FIND_HOSTILE_CREEPS).length > 0 || thisRoom.find(FIND_STRUCTURES, {filter: (structure) => {return (structure.structureType == STRUCTURE_INVADER_CORE)}}).length > 0) && towerEn < 100) {
                 if (fighters.length < 1) {
                     if (enAvail >= 550) {
-                        let newName = roomName + 'Ft' + Game.time;
+                        let newName = roomName + '-Ft-' + Game.time;
                         console.log('M>> Spawning new fighter: ' + newName);
                         spawn.spawnCreep([TOUGH, TOUGH, TOUGH, MOVE, MOVE, RANGED_ATTACK, MOVE, MOVE, RANGED_ATTACK], newName, { memory: { role: 'fighter', loc: roomName , destiny: roomName} });
                         // Game.spawns['SpawnW4N28'].spawnCreep([MOVE, MOVE, ATTACK, MOVE, MOVE, ATTACK, ATTACK, MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK], 'FighterW5N28', { memory: { role: 'fighter', loc: 'W4N28', destiny:'W5N28' } });
                     } else {
-                        let newName = roomName + 'Ft' + Game.time;
+                        let newName = roomName + '-Ft-' + Game.time;
                         console.log('M>> Spawning new fighter: ' + newName);
                         spawn.spawnCreep([RANGED_ATTACK, MOVE], newName, { memory: { role: 'fighter', loc: roomName } });
                     }
                 }
             }
-
+            //----melee----
+            if (thisRoom.find(FIND_STRUCTURES, {filter: (structure) => {return (structure.structureType == STRUCTURE_INVADER_CORE)}})) {
+                if (melees.length < 1) {
+                    if (enAvail >= 550) {
+                        let newName = roomName + '-Ml-' + Game.time;
+                        console.log('M>> Spawning new melee: ' + newName);
+                        spawn.spawnCreep([TOUGH, TOUGH, TOUGH, MOVE, MOVE, ATTACK, MOVE, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK], newName, { memory: { role: 'melee', loc: roomName , destiny: roomName} });
+                        // Game.spawns['SpawnW4N28'].spawnCreep([MOVE, MOVE, ATTACK, MOVE, MOVE, ATTACK, ATTACK, MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK,MOVE, ATTACK, ATTACK], 'FighterW5N28', { memory: { role: 'fighter', loc: 'W4N28', destiny:'W5N28' } });
+                    } else {
+                        let newName = roomName + '-Ml-' + Game.time;
+                        console.log('M>> Spawning new melee: ' + newName);
+                        spawn.spawnCreep([ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE], newName, { memory: { role: 'melee', loc: roomName } });
+                    }
+                }
+            }
             // 遍历每个矿物
             for (let mineral of minerals) {
                 // 判断矿物上是否已经建造了Extractor
@@ -413,13 +427,13 @@ module.exports.loop = function () {
                     console.log(`M>> 矿物 ${mineral.mineralType} 可以采集 ${mineral.mineralAmount}`);
                     if (miners.length < 1) {
                         if (enAvail >= 1600) {
-                            let newName = roomName + 'Mn' + Game.time;
+                            let newName = roomName + '-Mn-' + Game.time;
                             console.log('M>> Spawning new miner: ' + newName);
                             spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'miner', loc: roomName } });
                             spawn.memory.restTime = 195;
                         }
                         else if (enAvail >= 800) {
-                            let newName = roomName + 'Mn' + Game.time;
+                            let newName = roomName + '-Mn-' + Game.time;
                             console.log('M>> Spawning new miner: ' + newName);
                             spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'miner', loc: roomName } });
                             spawn.memory.restTime = 177;
@@ -430,13 +444,13 @@ module.exports.loop = function () {
                 }
             }
             //----alchemist----
-            let labs = Game.rooms[roomName].find(FIND_STRUCTURES, {
+            let labs = thisRoom.find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return structure.structureType == STRUCTURE_LAB;
                 }
             });
             if (alchemists.length < 1 && labs.length > 0) {
-                let newName = roomName + 'Al' + Game.time;
+                let newName = roomName + '-Al-' + Game.time;
                 console.log('M>> Spawning new alchemist: ' + newName);
                 spawn.spawnCreep([CARRY, CARRY, MOVE], newName, { memory: { role: 'alchemist', loc: roomName } });
                 spawn.memory.restTime = 159;
@@ -465,7 +479,7 @@ module.exports.loop = function () {
                 var oldest = creep;
             }
             if (creep.memory.loc == roomName) {
-                Game.rooms[roomName].memory[creepName] = life;
+                thisRoom.memory[creepName] = life;
                 //----call creeps to work----
                 switch (creep.memory.role) {
                     case 'harvester':
@@ -511,15 +525,15 @@ module.exports.loop = function () {
 
 
     //     //----spawning creeps----
-    //     let spawnsInRoom = Game.rooms[roomName].find(FIND_MY_SPAWNS);
+    //     let spawnsInRoom = thisRoom.find(FIND_MY_SPAWNS);
     //     let spawn = spawnsInRoom[0];
-    //     if (spawn && Game.rooms[roomName].controller.my) {
+    //     if (spawn && thisRoom.controller.my) {
     //         var spawnName = spawn.name;
     //     } else {
     //         var spawnName = 'SpawnW4N28';
     //     }
     //     //----claimer----
-    //     if (!Game.rooms[roomName].controller.my) {
+    //     if (!thisRoom.controller.my) {
     //         if (claimers.length < 1) {
     //             var newName = 'Claimer' + roomName + Game.time;
     //             console.log('M>> Spawning new claimer: ' + newName);
@@ -527,7 +541,7 @@ module.exports.loop = function () {
     //         }
     //     }
     //     //----fighter----
-    //     if (Game.rooms[roomName].find(FIND_HOSTILE_CREEPS).length > 0 && towerEn < 100) {
+    //     if (thisRoom.find(FIND_HOSTILE_CREEPS).length > 0 && towerEn < 100) {
     //         if (fighters.length < 1) {
     //             if (enAvail >= 550) {
     //                 let newName = roomName + 'Ft' + Game.time;
