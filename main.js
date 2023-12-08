@@ -19,19 +19,25 @@ module.exports.loop = function () {
     consData.run();
 
     //----setup trade----
-    var orderId1 = '654b2b0c9a89e1324971dea1'; //my 6528f9dd2ffd9917b792206d
-    var orderId2 = '653723e59a89e12968e00046'; //my 653723e59a89e12968e00046, 653724b69a89e1c6e2e045fd
-    var orderId3 = '655b2e0ec112ef00129f12ff'; //my 6540cca79a89e13ce8143925, 653724b69a89e1c6e2e045fd
-    var orderId4 = '6556d020a0ff73be3616c4ca'; //my 6556d020a0ff73be3616c4ca, 
+    var orderId1 = '654b2b0c9a89e1324971dea1'; //my 654b2b0c9a89e1324971dea1
+    var orderId2 = '6561aec824d86c001288598e'; //my 654990959a89e11756ee24fd, 655ebe782f944600124ab98d, 6561aec824d86c001288598e
+    var orderId3 = '655b2e0ec112ef00129f12ff'; //my 655b2e0ec112ef00129f12ff
+    var orderId4 = '656aba5c77f75f0012f8f88e'; //my 6556d020a0ff73be3616c4ca, 656aba5c77f75f0012f8f88e
     // Game.market.deal('6536d07f9a89e1f679c46d5a', 00, 'W2N27');
     var order1 = Game.market.getOrderById(orderId1);
     var order2 = Game.market.getOrderById(orderId2);
     var order3 = Game.market.getOrderById(orderId3);
     var order4 = Game.market.getOrderById(orderId4);
 
+    // var myOrders = [];
+    // myOrders.push(Game.market.orders[orderId1]);
+    // myOrders.push(Game.market.orders[orderId2]);
+    // myOrders.push(Game.market.orders[orderId3]);
+    // myOrders.push(Game.market.orders[orderId4]);
+    
     // Game.market.createOrder({ type: ORDER_SELL, resourceType: RESOURCE_UTRIUM_HYDRIDE, price: 100, totalAmount: 1000, roomName: "W2N27" });
     // Game.market.createOrder({ type: ORDER_BUY, resourceType: RESOURCE_HYDROGEN, price: 111, totalAmount: 1000, roomName: "W2N27" });
-    // Game.rooms['W5N28'].terminal.send('energy', 5000, 'W4N28');
+    // Game.rooms['W5N28'].terminal.send('energy', 7000, 'W1N27');
 
     // let goodOrders = Game.market.getAllOrders(order => 
     //     order.resourceType == RESOURCE_OXIDANT &&
@@ -60,9 +66,6 @@ module.exports.loop = function () {
     var dismantleTarget = ''; //----recycle some buildings for builder----
 
     //----link----
-    // if (link1.store[RESOURCE_ENERGY] >= 400 && link2.store[RESOURCE_ENERGY] < 400) {
-    //     link1.transferEnergy(link2);
-    // }
     roleLink.run();
 
     delete Memory.rooms;
@@ -92,15 +95,26 @@ module.exports.loop = function () {
             var tradeCost = Game.market.calcTransactionCost(tradeAmount, 'W2N27', order.roomName);
             console.log(`Order ID: ${order.id}, Resource Type: ${order.resourceType}, Room: ${order.roomName}, Price: ${order.price}, Amount: ${order.amount}, Remaining: ${order.remainingAmount}, Cost: ${tradeCost} per ${tradeAmount}`);
         }
-
+        
+        // console.log(myOrders);
+        let roomLevel;
+        let enAvail;
         if (thisRoom && thisRoom.controller.my) {
-            var roomLevel = thisRoom.controller.level;
-            var enAvail = thisRoom.energyAvailable;
+            roomLevel = thisRoom.controller.level;
+            enAvail = thisRoom.energyAvailable;
         }
         //----show energy----
-        let controllerProgress = thisRoom.controller.progress;
-        let controllerProgressTotal = thisRoom.controller.progressTotal;
-        console.log('🏰 M>>>>>>>>>> Room: ' + roomName + ', level ' + roomLevel + ', ' + controllerProgress + '/' + controllerProgressTotal + ' = ' + Math.round(controllerProgress * 100 / controllerProgressTotal) + '%, spawn en: ' + enAvail + ' <<<<<<<<<<🏰');
+        let controllerProgress;
+        let controllerProgressTotal;
+        if (roomLevel == 8) {
+            controllerProgress = Game.gcl.progress;
+            controllerProgressTotal = Game.gcl.progressTotal;
+        }
+        else {
+            controllerProgress = thisRoom.controller.progress;
+            controllerProgressTotal = thisRoom.controller.progressTotal;
+        }
+        console.log('🏰 M>>>>>>>>>> Room: [' + roomName + '], level ' + roomLevel + ', ' + controllerProgress + '/' + controllerProgressTotal + ' = ' + Math.round(controllerProgress * 100 / controllerProgressTotal) + '%, spawn en: ' + enAvail + ' <<<<<<<<<<🏰');
         //----count extensions storage----
         let extensionEnergy = 0;
         let extensions = thisRoom.find(FIND_MY_STRUCTURES, {
@@ -112,31 +126,34 @@ module.exports.loop = function () {
             // console.log(`M>> Room ${roomName} has ${extensionCount} extensions.`);
         }
         for (let extension of extensions) {
-            extensionEnergy += extension.store.getUsedCapacity(RESOURCE_ENERGY);
+            extensionEnergy += extension.store[RESOURCE_ENERGY];
         }
         //----storage of storage----
         let storage = thisRoom.storage;
         if (storage) {
-            var storageStorage = storage.store.getUsedCapacity(RESOURCE_ENERGY);
+            var storageStorage = storage.store[RESOURCE_ENERGY];
         } else { storageStorage = 0; }
-        // console.log('🟡 M>> stg: ' + storageStorage + ', exen: ' + extensionEnergy + '/' + extensionCount * extensionCapacity + ', ext: ' + extensionCount);
+        let upCount = 1;
+        if (storageStorage > 600000) {
+            upCount = 2;
+        }
         //----container storage----
         let containerEn = 0;
+        let containerCapacity = 0;
         let containers = thisRoom.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_CONTAINER;
             }
         });
         if (containers.length > 0){
-            let containerCapacity = containers[0].store.getCapacity();
+            containerCapacity = containers[0].store.getCapacity();
         
             for (let container of containers) {
                 containerEn += container.store[RESOURCE_ENERGY];
             }
-            // console.log('🟡 M>> Containers ' + containers.length + ', energy: ' + containerEn);
-            console.log('🟡 M>> stg: ' + storageStorage + ', ext: ' + extensions.length + ', exen: ' + extensionEnergy + '/' + extensions.length * extensionCapacity + ', Ctn ' + containers.length + ', en: ' + containerEn + '/' + containerCapacity * containers.length);
         }
-        
+        console.log('🟡 M>> stg: ' + storageStorage + ', ext: ' + extensions.length + ', exen: ' + extensionEnergy + '/' + extensions.length * extensionCapacity + ', Ctn ' + containers.length + ', en: ' + containerEn + '/' + containerCapacity * containers.length);
+
         //----find dropped energy----
         let droppedEnergy = thisRoom.find(FIND_DROPPED_RESOURCES
             , {
@@ -155,14 +172,12 @@ module.exports.loop = function () {
             // 获取资源的位置和数量
             const { x, y } = drop.pos;
             const amount = drop.amount;
-
             // 在资源的位置上绘制一个圆圈
             thisRoom.visual.circle(x, y, { radius: 0.4, fill: 'yellow', opacity: 0.5 });
-
             // 在资源的位置上绘制资源的数量
             thisRoom.visual.text(amount.toString(), x, y + 0.5, { color: 'white', font: 0.5 });
         }
-        //----find tombstone----
+        //----find tombstone + ruins----
         let tombstones = thisRoom.find(FIND_TOMBSTONES, {
             filter: (tombstone) => {
                 return _.sum(tombstone.store) > 0;
@@ -173,19 +188,16 @@ module.exports.loop = function () {
             filter: ruin => ruin.store.getUsedCapacity() > 0
         }));
         if (tombstones.length > 0) {
-            console.log('🟡🟡 M>> sources in TOMB: ' + tombstones[0] + ': ' + _.sum(tombstones[0].store));
+            console.log('🟡🟡 M>> sources in TOMB/RUIN: ' + tombstones[0] + ': ' + _.sum(tombstones[0].store));
         }
         //----count available harvest spots----
         let sources = thisRoom.find(FIND_SOURCES);
-        for (let source of sources) {
-            let countharvester = _.filter(Game.creeps, (creep) => creep.memory.workingSlot == source.id);
-            console.log('⛏️ M>> ' + countharvester.length + ' creeps harvesting ' + source);
-        }
-        // sourceSpot.push({id:'5bbcaccf9099fc012e6363ed',count:1});
-        // sources.push(Game.getObjectById('5bbcaccf9099fc012e6363ed'));
-        // console.log(sourceSpot[2].id);
+        // for (let source of sources) {
+        //     let countharvester = _.filter(Game.creeps, (creep) => creep.memory.workingSlot == source.id);
+        //     console.log('⛏️ M>> ' + countharvester.length + ' creeps harvesting ' + source);
+        // }
 
-        //----miner----
+        //----mineral----
         let minerals = thisRoom.find(FIND_MINERALS);
 
         //----call tower----
@@ -197,7 +209,6 @@ module.exports.loop = function () {
             roleTower.run(tower, storageStorage, dismantleTarget);
             towerEn += tower.store.getUsedCapacity(RESOURCE_ENERGY);
         }
-        // console.log('M>> tower EN total: ' + towerEn);
 
         //----clear memory----
         for (let creepName in Memory.creeps) {
@@ -239,7 +250,11 @@ module.exports.loop = function () {
         // }
         let spawnsInRoom = thisRoom.find(FIND_MY_SPAWNS);
         for (let s of spawnsInRoom) {
-            if (thisRoom.find(FIND_HOSTILE_CREEPS).length > 0 && towerEn < 100) {
+            // if (!s.memory.restTime) {
+            //     s.memory.restTime = 2;
+            // }
+            // else 
+            if (thisRoom.find(FIND_HOSTILE_CREEPS).length > 0 && towerEn < 100 && !s.Spawning) {
                 s.memory.restTime = 0;
                 spawnName = s.name;
                 break;
@@ -247,7 +262,7 @@ module.exports.loop = function () {
             else if (s.memory.restTime > 0) {
                 s.memory.restTime--;
             }
-            else if (!s.Spawning && (s.memory.restTime == 0 || !s.memory.restTime)) { // && (s.memory.restTime == 0 || !s.memory.restTime)
+            else if (!s.Spawning && (s.memory.restTime == 0 || !s.memory.restTime)) {
                 spawnName = s.name;
                 break;
             }
@@ -262,11 +277,9 @@ module.exports.loop = function () {
         //     var spawnName = 'SpawnW4N28';
         // }
         let spawn = Game.spawns[spawnName];
-        console.log(spawnName + ':' + spawn.memory.restTime);
+        // console.log(spawnName + ':' + spawn.memory.restTime);
 
-        if (spawn.memory.restTime > 0) {
-            // spawn.memory.restTime--;
-        } else {
+        if (spawn.memory.restTime == 0) {
             // console.log('M>> ----spawner: ' + spawnName);
             if (totalWorkParts < sources.length * 5 && thisRoom.controller.my) { //----harvester----
                 if (enAvail >= 900) {
@@ -288,9 +301,10 @@ module.exports.loop = function () {
                     let newName = roomName + '-Hv-' + Game.time;
                     console.log('M>> Spawning new harvester: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
+                    spawn.memory.restTime = 162;
                 }
             }
-            else if (upgraders.length < 1 && thisRoom.controller.my) { //----upgrader----
+            else if (upgraders.length < upCount && thisRoom.controller.my) { //----upgrader----
                 if (enAvail >= 1500 && sources.length > 1) {
                     let newName = roomName + '-Up-' + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
@@ -315,6 +329,7 @@ module.exports.loop = function () {
                     let newName = roomName + '-Up-' + Game.time;
                     console.log('M>> Spawning new upgrader: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
+                    spawn.memory.restTime = 162;
                 }
             }
             else if (builders.length < 1) { //----builder----
@@ -346,6 +361,7 @@ module.exports.loop = function () {
                     let newName = roomName + '-Bd-' + Game.time;
                     console.log('M>> Spawning new builder: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
+                    spawn.memory.restTime = 162;
                 }
             }
             else if (transporter.length < 2 && thisRoom.controller.my) { //----transporter----
@@ -378,6 +394,7 @@ module.exports.loop = function () {
                     let newName = roomName + '-Tr-' + Game.time;
                     console.log('M>> Spawning new transporter: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
+                    spawn.memory.restTime = 162;
                 }
             }
             //----claimer----
@@ -390,7 +407,12 @@ module.exports.loop = function () {
                 }
             }
             //----fighter----
-            if ((thisRoom.find(FIND_HOSTILE_CREEPS).length > 0 || thisRoom.find(FIND_STRUCTURES, {filter: (structure) => {return (structure.structureType == STRUCTURE_INVADER_CORE)}}).length > 0) && towerEn < 100) {
+            let roomInvader = thisRoom.find(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType == STRUCTURE_INVADER_CORE)
+                }
+            });
+            if ((thisRoom.find(FIND_HOSTILE_CREEPS).length > 0 || roomInvader.length > 0) && towerEn < 300) {
                 if (fighters.length < 1) {
                     if (enAvail >= 550) {
                         let newName = roomName + '-Ft-' + Game.time;
@@ -405,7 +427,7 @@ module.exports.loop = function () {
                 }
             }
             //----melee----
-            if (thisRoom.find(FIND_STRUCTURES, {filter: (structure) => {return (structure.structureType == STRUCTURE_INVADER_CORE)}})) {
+            if (roomInvader.length > 0) {
                 if (melees.length < 1) {
                     if (enAvail >= 550) {
                         let newName = roomName + '-Ml-' + Game.time;
@@ -467,7 +489,6 @@ module.exports.loop = function () {
                 { align: 'left', opacity: 0.8 });
         }
 
-        //----find oldest creep----
         var age = 1500;
         //----call creeps to work----
         for (let creepName in Game.creeps) {
@@ -581,10 +602,7 @@ module.exports.loop = function () {
     // console.log('container ' + Game.getObjectById('650040e2dbe835a751c7c705').storage.store[RESOURCE_ENERGY] );
     // console.log(Game.getObjectById('65052ea2c34196660d3e9925').store[RESOURCE_OXYGEN]);
 
-    // var lab1 = Game.getObjectById(Memory.structures.lab1.id);
-    // var lab2 = Game.getObjectById(Memory.structures.lab2.id);
-    // var lab3 = Game.getObjectById(Memory.structures.lab3.id);
-    // lab3.runReaction(lab1, lab2);
+    console.log('💻 CPU in bucket: ' + Game.cpu.bucket);
     if (Game.cpu.bucket >= 10000) {
         Game.cpu.generatePixel();
     }

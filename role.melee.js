@@ -12,7 +12,7 @@ var roleMelee = {
     /** @param {Creep} creep **/
     run: function (creep, roomName, dismantleTargetId) {
         if (!creep.memory.destiny) {
-            creep.memory.destiny = creep.memory.loc; //creep.memory.loc;
+            creep.memory.destiny = creep.memory.loc;
         }
         if (!Memory.whitelist) {
             Memory.whitelist = {};
@@ -21,7 +21,7 @@ var roleMelee = {
         // Memory.whitelist['Fatoribo'] = true;
 
         // console.log('⚔️ F: whitelist' + Memory.whiteList);
-        creep.memory.destiny = 'W3N28';
+        // creep.memory.destiny = 'W3N28';
         if (creep.room.name != creep.memory.destiny) {
             creep.say('F' + creep.memory.destiny);
             creep.moveTo(new RoomPosition(25, 25, creep.memory.destiny));

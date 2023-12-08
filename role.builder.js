@@ -28,25 +28,27 @@ var roleBuilder = {
         }
         else if (creep.memory.building) {
             //----create preserved construction site----
-            if (creep.room.find(FIND_STRUCTURES,{filter:(structure)=>{return structure.structureType==STRUCTURE_SPAWN}})) {
-                for (let flagName in Game.flags) {
-                    let flag = Game.flags[flagName];
-                    if (flag.name.includes('Spawn')) {
-                        let result = flag.pos.createConstructionSite(STRUCTURE_SPAWN, flag.name);
-                        if (result === OK) {
-                            console.log('Construction site created at flag position');
-                            flag.remove;
-                        } else {
-                            console.log('Failed to create construction site');
-                        }
-                    }
-                }
-            }
+            // if (creep.room.find(FIND_STRUCTURES,{filter:(structure)=>{return structure.structureType==STRUCTURE_SPAWN}}).length == 0) {
+            //     for (let flagName in Game.flags) {
+            //         let flag = Game.flags[flagName];
+            //         if (flag.name.includes('Spawn')) {
+            //             let result = flag.pos.createConstructionSite(STRUCTURE_SPAWN, flag.name);
+            //             if (result === OK) {
+            //                 console.log('Construction site created at flag position');
+            //                 flag.remove;
+            //             } else {
+            //                 console.log('Failed to create construction site');
+            //             }
+            //         }
+            //     }
+            // }
             //----build----
             var target = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
             if (target) {
+                delete creep.memory.path;
                 if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { visualizePathStyle: { stroke: '#0099ff' } });
+                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#0099ff' } });
+                    creep.room.visual.line(creep.pos, target.pos, {color: '#0099ff', width:0.1, lineStyle: 'dotted'});
                 }
             }
 
@@ -59,9 +61,11 @@ var roleBuilder = {
                     }
                 });
                 if (target) {
+                    delete creep.memory.path;
                     if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target, { visualizePathStyle: { stroke: '#0099ff' } });
+                        creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#0099ff' } });
                         creep.say('🚧 BtT');
+                        creep.room.visual.line(creep.pos, target.pos, {color: '#0099ff', width:0.1, lineStyle: 'dotted'});
                     }
                 }
                 else { //----fix----
@@ -80,11 +84,9 @@ var roleBuilder = {
                         if (damagedStructures.length > 0) {
                             creep.memory.target = _.sortBy(damagedStructures, s => s.hits)[0].id;
                         }
-
+                        delete creep.memory.path;
                     }
-
                     target = Game.getObjectById(creep.memory.target);
-
                     if (target) {
                         if (creep.repair(target) == ERR_NOT_IN_RANGE) {
                             if (!creep.memory.path) {
@@ -93,11 +95,27 @@ var roleBuilder = {
                             // creep.moveTo(target, { visualizePathStyle: { stroke: '#0099ff' } });
                             creep.moveByPath(creep.memory.path);
                             creep.say('🛠️ fix');
+                            creep.room.visual.text('🚧', target.pos, {fontSize:10 });
+                            creep.room.visual.line(creep.pos, target.pos, {color: '#0099ff', width:0.1, lineStyle: 'dotted'});
+                            if (creep.memory.path.length > 0) {
+                                // 获取creep的路线
+                                let path = creep.memory.path;
+                                // 获取下一步位置
+                                let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                // 在下一步位置查找所有对象
+                                let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
+                                if (objects.length > 0) {
+                                    delete creep.memory.path;
+                                }
+                            }
+                            else {
+                                delete creep.memory.path;
+                            }
                         }
-                        else {
-                            delete creep.memory.target;
-                            delete creep.memory.path;
-                        }
+                        // else {
+                        //     delete creep.memory.target;
+                        //     delete creep.memory.path;
+                        // }
                     }
                 }
             }
@@ -113,7 +131,7 @@ var roleBuilder = {
             }
             if (target && target.room.name == creep.memory.loc) {
                 if (creep.dismantle(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#0099ff' } });
+                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#0099ff' } });
                 }
             }
             else {
@@ -127,7 +145,7 @@ var roleBuilder = {
                 if (target) {
                     // console.log('U>> loot: ' + target);
                     if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target, { visualizePathStyle: { stroke: '#0099ff' } });
+                        creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#0099ff' } });
                         creep.say('🚧E:' + target.amount)
                     }
                 }
@@ -136,14 +154,15 @@ var roleBuilder = {
                     let containers = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
                         filter: (structure) => {
                             return (structure.structureType == STRUCTURE_CONTAINER
-                                || structure.structureType == STRUCTURE_LINK)
+                                // || structure.structureType == STRUCTURE_LINK
+                                )
                                 && structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50;
                         }
                     });
                     if (containers.length > 0) {
                         let target = creep.pos.findClosestByPath(containers);
                         if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#0099ff' } });
+                            creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#0099ff' } });
                             creep.say('🚧C:' + target.pos.x + ',' + target.pos.y);
                         }
                     }
@@ -157,15 +176,15 @@ var roleBuilder = {
                         });
                         if (target) {
                             if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#0099ff' } });
+                                creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#0099ff' } });
                                 creep.say('🚧S:' + target.pos.x + ',' + target.pos.y);
                             }
                         }
                         else { //----harvest by self----
                             let target = creep.pos.findClosestByPath(FIND_SOURCES);
-                            console.log('🚧 B>> harvest: ' + target);
+                            // console.log('🚧 B>> harvest: ' + target);
                             if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#0099ff' } });
+                                creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#0099ff' } });
                                 creep.say('🚧B>harv');
                             }
                         }

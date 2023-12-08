@@ -38,10 +38,22 @@ var roleLink = {
         }
         //----W5N28----
         let linkd1 = Game.getObjectById('6549998cce5f31cfe3c5f31a');
-        let linkd2 = Game.getObjectById('654df541cbb618a55ddfb95c');
+        let linkd2 = Game.getObjectById('655dd7bc57d7ea6af338fc75');
+        let linkd3 = Game.getObjectById('654df541cbb618a55ddfb95c');
         let ranged1 = linkd1.pos.getRangeTo(linkd2);
+        let ranged2 = linkd2.pos.getRangeTo(linkd3);
         if (linkd1.store[RESOURCE_ENERGY] >= ranged1*10 && linkd2.store.getFreeCapacity(RESOURCE_ENERGY) > ranged1*10) {
             linkd1.transferEnergy(linkd2);
+        }
+        else if (linkd2.store[RESOURCE_ENERGY] >= ranged2*10 && linkd3.store.getFreeCapacity(RESOURCE_ENERGY) > ranged2*10) {
+            linkd2.transferEnergy(linkd3);
+        }
+        //----W3N28----
+        let linke1 = Game.getObjectById('656552935839c258adffb13d');
+        let linke2 = Game.getObjectById('65656d8c0d2d8d1e9c17b654');
+        let rangee1 = linke1.pos.getRangeTo(linke2);
+        if (linke1.store[RESOURCE_ENERGY] >= rangee1*10 && linke2.store.getFreeCapacity(RESOURCE_ENERGY) > rangee1*10) {
+            linke1.transferEnergy(linke2);
         }
     }
 }

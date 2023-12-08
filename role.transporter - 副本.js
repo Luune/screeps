@@ -1,13 +1,19 @@
 var roleTransporter = {
     run: function (creep, roomName, sortedEnergys, tombstones, order) {
-         // console.log('T>> dropped energy: '+sortedEnergys);
+        // console.log('T>> dropped energy: '+sortedEnergys);
         //----set status----
         if (creep.memory.transporting && creep.store.getUsedCapacity() == 0) {
             creep.memory.transporting = false;
+            delete creep.memory.target;
+            delete creep.memory.targetResource;
+            delete creep.memory.path;
             creep.say('🚛 loot');
         }
         if (!creep.memory.transporting && creep.store.getFreeCapacity() == 0) {
             creep.memory.transporting = true;
+            delete creep.memory.target;
+            delete creep.memory.targetResource;
+            delete creep.memory.path;
             creep.say('🚚 transport');
         }
 
@@ -31,7 +37,7 @@ var roleTransporter = {
         var containersToFill = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_CONTAINER
-                    && structure.store.getFreeCapacity(RESOURCE_ENERGY) >= 1000;
+                    && structure.store.getFreeCapacity(RESOURCE_ENERGY) >= 800;
             }
         });
         var containersToLoot = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
@@ -43,7 +49,7 @@ var roleTransporter = {
         var linksToLoot = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_LINK)
-                    && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 500;
+                    && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 400;
             }
         });
         var emptyStorage = Game.rooms[creep.memory.loc].storage;
@@ -59,12 +65,12 @@ var roleTransporter = {
                 delete creep.memory.targetResource;
                 delete creep.memory.path;
                 //----store minerals----
-                for (var resourceType of Object.keys(creep.store)) {
+                for (let resourceType of Object.keys(creep.store)) {
                     // console.log('T>> carrying: ' + resourceType + ': ' + creep.store[resourceType]);
-                    if (resourceType != RESOURCE_ENERGY) {
+                    if (resourceType != RESOURCE_ENERGY && emptyStorage) {
                         creep.memory.target = emptyStorage.id;
                         creep.memory.targetResource = resourceType;
-                        console.log('🚚 T>> resources to storage: ' + emptyStorage.id);
+                        // console.log('🚚 T>> resources to storage: ' + emptyStorage.id);
                         break;
                     }
                     //----store energy----
@@ -74,8 +80,9 @@ var roleTransporter = {
                             return creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b);
                         });
                         creep.memory.target = emptyExtensions[0].id;
+                        // creep.memory.target = creep.pos.findClosestByPath(emptyExtensions).id;
                         creep.memory.targetResource = resourceType;
-                        console.log('🚚 T>> to extension: ' + emptyExtensions[0].id);
+                        // console.log('🚚 T>> to extension: ' + emptyExtensions[0].id);
                         break;
                     }
                     //----fill tower/lab/factory----
@@ -89,17 +96,17 @@ var roleTransporter = {
                         }
                     }
                     //----trade cost----
-                    else if (terminalEn < 5000 && terminal1.room.name == creep.memory.loc) {
+                    else if (terminalEn < 8000 && terminal1.room.name == creep.memory.loc) {
                         creep.memory.target = terminal1.id;
                         creep.memory.targetResource = resourceType;
-                        console.log('🚚 T>> to terminal EN: ' + terminal1.id);
+                        // console.log('🚚 T>> to terminal EN: ' + terminal1.id);
                         break;
                     }
                     //----fill container----
                     else if (containersToFill.length > 0) {
                         creep.memory.target = _.min(containersToFill, container => container.store[RESOURCE_ENERGY]).id;
                         creep.memory.targetResource = resourceType;
-                        console.log('T>> to this room container: ' + creep.memory.target);
+                        // console.log('T>> to container: ' + creep.memory.target);
                         break;
                     }
                     //----fill storage----
@@ -118,7 +125,7 @@ var roleTransporter = {
             if (target) {
                 var result = creep.transfer(target, targetResource);
                 // console.log('🚚 T>> ' + creep.name + ' to ' + target.id + ' ' + targetResource + ' ' + result);
-                if (creep.transfer(target, targetResource) == ERR_NOT_IN_RANGE) {
+                if (result == ERR_NOT_IN_RANGE) {
                     // if (!creep.memory.path) {
                     //     creep.memory.path = creep.pos.findPathTo(target);
                     // }
@@ -134,7 +141,7 @@ var roleTransporter = {
                     //     }
                     // }
                     // creep.moveByPath(creep.memory.path);
-                    creep.moveTo(target, {reusePath: 5, visualizePathStyle: { stroke: '#00ff00' }});
+                    creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#00ff00' } });
                     creep.say('🚚 ' + target.pos.x + ',' + target.pos.y);
                 }
                 else {
@@ -142,6 +149,11 @@ var roleTransporter = {
                     delete creep.memory.targetResource;
                     delete creep.memory.path;
                 }
+            }
+            else {
+                delete creep.memory.target;
+                delete creep.memory.targetResource;
+                delete creep.memory.path;
             }
         }
         //----loot----
@@ -167,6 +179,11 @@ var roleTransporter = {
                         creep.memory.targetResource = resourceType;
                     }
                 }
+                //----pick terminal extra energy----
+                else if (terminalEn > 8500) {
+                    creep.memory.target = terminal1.id;
+                    creep.memory.targetResource = RESOURCE_ENERGY;
+                }
                 //----pick link----
                 else if (linksToLoot.length > 0) {
                     let nearLink = creep.pos.findClosestByPath(linksToLoot);
@@ -184,13 +201,8 @@ var roleTransporter = {
                         // console.log('🚛 T>> from container ' + maxContainer.id);
                     }
                 }
-                //----pick terminal extra energy----
-                else if (terminalEn > 5300) {
-                    creep.memory.target = terminal1.id;
-                    creep.memory.targetResource = RESOURCE_ENERGY;
-                }
                 //----pick storage----
-                else if (emptyExtensions.length > 0 && emptyStorage.store[RESOURCE_ENERGY] > 2000) {
+                else if (emptyExtensions.length > 0 && emptyStorage && emptyStorage.store[RESOURCE_ENERGY] > 2000) {
                     creep.memory.target = emptyStorage.id;
                     creep.memory.targetResource = RESOURCE_ENERGY;
                 }
@@ -202,7 +214,7 @@ var roleTransporter = {
             }
             var target = Game.getObjectById(creep.memory.target);
             var targetResource = creep.memory.targetResource;
-            if (target) {
+            if (target && (target.amount > 0 || target.store[targetResource] > 0)) {
                 // console.log('🚛 T>> ' + creep.name + ' from ' + creep.memory.target + ' ' + targetResource);
                 if (creep.withdraw(target, targetResource) == ERR_NOT_IN_RANGE || creep.pickup(target) == ERR_NOT_IN_RANGE) {
                     // if (!creep.memory.path) {
@@ -220,7 +232,7 @@ var roleTransporter = {
                     //     }
                     // }
                     // creep.moveByPath(creep.memory.path);
-                    creep.moveTo(target, {reusePath: 5, visualizePathStyle: { stroke: '#00ff00' }});
+                    creep.moveTo(target, { reusePath: 5, visualizePathStyle: { stroke: '#00ff00' } });
                     creep.say('🚛' + target.pos.x + ',' + target.pos.y);
                 }
                 else {
@@ -230,10 +242,10 @@ var roleTransporter = {
                 }
             }
             else {
-                    delete creep.memory.target;
-                    delete creep.memory.targetResource;
-                    delete creep.memory.path;
-                }
+                delete creep.memory.target;
+                delete creep.memory.targetResource;
+                delete creep.memory.path;
+            }
         }
     }
 };

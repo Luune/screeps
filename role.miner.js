@@ -25,7 +25,7 @@ var roleMiner = {
             for (let mineral of minerals) {
                 let minerOnMineral = _.filter(Game.creeps, (creep) => creep.memory.workingSlot == mineral.id && creep.memory.role == 'miner');
                 let totalWorkParts = _.sum(_.map(minerOnMineral, (creep) => creep.body.filter((part) => part.type === WORK).length));
-                console.log('⛏️ MN>> Mineral:' + mineral.id + ',assigned:' + minerOnMineral + ',' + totalWorkParts);
+                // console.log('⛏️ MN>> Mineral:' + mineral.id + ',assigned:' + minerOnMineral + ',' + totalWorkParts);
                 if (totalWorkParts < 5) {
                     creep.memory.workingSlot = mineral.id;
                     creep.memory.miningType = mineral.mineralType;
@@ -37,7 +37,7 @@ var roleMiner = {
         //discharge
         if (creep.memory.discharging) {
             //----store minerals----
-            console.log('⛏️ MN>> carrying: ' + creep.memory.miningType + ': ' + creep.store[creep.memory.miningType]);
+            // console.log('⛏️ MN>> carrying: ' + creep.memory.miningType + ': ' + creep.store[creep.memory.miningType]);
             var minerLab = creep.pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_LAB)
@@ -55,7 +55,7 @@ var roleMiner = {
                 });
             }
             if (creep.transfer(target, creep.memory.miningType) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, { reusePath: 30, visualizePathStyle: { stroke: '#ffff00' } });
+                creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffff00' } });
             }
         }
         else { //----mining----
@@ -64,7 +64,7 @@ var roleMiner = {
                 creep.moveTo(new RoomPosition(25, 25, creep.memory.loc), { reusePath: 20 });
             } else {
                 if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { visualizePathStyle: { stroke: '#ffff00' } });
+                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffff00' } });
                 }
                 if (target.mineralAmount == 0) {
                     if (creep.pos.getRangeTo(creep.room.storage) <= 3) {

@@ -18,7 +18,7 @@ var roleHarvester = {
             for (let source of sources) {
                 let harvesterOnS = _.filter(Game.creeps, (creep) => creep.memory.workingSlot == source.id && creep.memory.role == 'harvester');
                 let totalWorkParts = _.sum(_.map(harvesterOnS, (creep) => creep.body.filter((part) => part.type === WORK).length));
-                console.log('⛏️ H>> Source:' + source.id + ',assigned:' + harvesterOnS + ',' + totalWorkParts);
+                // console.log('⛏️ H>> Source:' + source.id + ',assigned:' + harvesterOnS + ',' + totalWorkParts);
                 if (totalWorkParts < 5) {
                     creep.memory.workingSlot = source.id;
                     // break;
@@ -55,7 +55,7 @@ var roleHarvester = {
                 //---- store to link----
                 if (link) {
                     if (creep.transfer(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(link, { visualizePathStyle: { stroke: '#ffffff' } });
+                        creep.moveTo(link, {reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffffff' } });
                     }
                 }
                 else { //----store energy----
@@ -83,7 +83,7 @@ var roleHarvester = {
                         creep.say('⛏️ harvest');
                     } else {
                         if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
+                            creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffffff' } });
                         }
                     }
                 }
@@ -104,7 +104,7 @@ var roleHarvester = {
                 // });
 
                 if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
+                    creep.moveTo(target, {reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffffff' } });
                 }
 
                 // if(link.store.getFreeCapacity(RESOURCE_ENERGY)>0){

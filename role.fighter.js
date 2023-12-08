@@ -11,6 +11,9 @@ var roleFighter = {
 
     /** @param {Creep} creep **/
     run: function (creep, roomName, dismantleTargetId) {
+        if (!creep.memory.destiny) {
+            creep.memory.destiny = creep.memory.loc;
+        }
         if (!Memory.whitelist) {
             Memory.whitelist = {};
         }
