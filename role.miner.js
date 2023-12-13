@@ -14,11 +14,11 @@ var roleMiner = {
         //set job
         if (creep.memory.discharging && creep.store.getUsedCapacity() == 0) {
             creep.memory.discharging = false;
-            creep.say('⛏️ mining');
+            creep.say('⛏️ 采矿');
         }
         if (!creep.memory.discharging && creep.store.getFreeCapacity() == 0) {
             creep.memory.discharging = true;
-            creep.say('🈵 unload');
+            creep.say('🈵 卸货');
         }
         //sign working slot
         if (!creep.memory.workingSlot) {

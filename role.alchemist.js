@@ -12,11 +12,11 @@ var roleAlchemist = {
         //----set status----
         if (creep.memory.transporting && creep.store.getUsedCapacity() == 0) {
             creep.memory.transporting = false;
-            creep.say('🧪 loot');
+            creep.say('🧪 收集');
         }
         if (!creep.memory.transporting && creep.store.getFreeCapacity() == 0) {
             creep.memory.transporting = true;
-            creep.say('⚗️ send');
+            creep.say('⚗️ 运送');
         }
 
         // console.log('A>> ' + order.resourceType + ' ' + order.remainingAmount );
@@ -39,6 +39,15 @@ var roleAlchemist = {
                 var lab4 = Game.getObjectById(Memory.structures.lab4W2N27['id']);
                 var lab4Res = Memory.structures.lab4W2N27['resource'];
                 Game.rooms[creep.memory.loc].visual.text(lab4Res, lab4.pos.x, lab4.pos.y+0.1 , { color: 'black', font: 0.5 });
+                var lab5 = Game.getObjectById(Memory.structures.lab5W2N27['id']);
+                var lab5Res = Memory.structures.lab5W2N27['resource'];
+                Game.rooms[creep.memory.loc].visual.text(lab5Res, lab5.pos.x, lab5.pos.y+0.1 , { color: 'black', font: 0.5 });
+                var lab6 = Game.getObjectById(Memory.structures.lab6W2N27['id']);
+                var lab6Res = Memory.structures.lab6W2N27['resource'];
+                Game.rooms[creep.memory.loc].visual.text(lab6Res, lab6.pos.x, lab6.pos.y+0.1 , { color: 'black', font: 0.5 });
+                var lab7 = Game.getObjectById(Memory.structures.lab7W2N27['id']);
+                var lab7Res = Memory.structures.lab7W2N27['resource'];
+                Game.rooms[creep.memory.loc].visual.text(lab7Res, lab7.pos.x, lab7.pos.y+0.1 , { color: 'black', font: 0.5 });
                 var factory = Game.getObjectById(Memory.structures.factoryW2N27['id']);
                 var factoryRes = Memory.structures.factoryW2N27['resource'];
                 var factoryPrd = Memory.structures.factoryW2N27['prod'];
@@ -129,10 +138,49 @@ var roleAlchemist = {
                 lab3.reverseReaction(lab1, lab2);
             }
         }
-        //----run factory---
-        if (factory && factory.store[factoryRes] >= 500) { //&& factory.store[Memory.structures.factory1.resource] >= 500 && factory.store[RESOURCE_ENERGY] >= 200
+        if (lab7) {
+            if (lab7Res == '') {
+                if (lab5 && lab5Res != '' && lab6 && lab6Res != '') {
+                    lab7.runReaction(lab5, lab6);
+                }
+            }
+            else {
+                lab7.reverseReaction(lab5, lab6);
+            }
+        }
+        
+        //----run factory----
+        if (factory && factory.store[factoryRes] >= 500
+        && (storage.store[factoryPrd] + terminal.store[factoryPrd] + 100) * 5 < (storage.store[factoryRes] + terminal.store[factoryRes])) {
             var result = factory.produce(factoryPrd);
             // console.log(result);
+        }
+        else if (factory 
+        && (storage.store[factoryPrd] + terminal.store[factoryPrd] + 100) * 5 >= (storage.store[factoryRes] + terminal.store[factoryRes]) 
+        && storage.store[RESOURCE_ENERGY] > 600000
+        && storage.store[RESOURCE_BATTERY] < 30000) {
+            var result = factory.produce(RESOURCE_BATTERY);
+        }
+        
+        //----run terminal----
+        if (terminal) {
+            for (resourceType in terminal.store) {
+                if ((resourceType == 'ZH' || resourceType == 'UH' || resourceType == 'KO' || resourceType == 'GO') && terminal.room.name != 'W5N28') {
+                    terminal.send(resourceType, terminal.store[resourceType], 'W5N28');
+                }
+                else if ((resourceType == 'ZK' || resourceType == 'UL') && terminal.store[resourceType] >= 50 && terminal.room.name != 'W2N27') {
+                    terminal.send(resourceType, terminal.store[resourceType], 'W2N27');
+                }
+                else if ((resourceType == RESOURCE_BATTERY) && terminal.store[resourceType] >= 500 && terminal.room.name != 'W2N27') {
+                    terminal.send(resourceType, terminal.store[resourceType], 'W2N27');
+                }
+                else if ((resourceType == 'U' || resourceType == 'L') && terminal.store[resourceType] >= 50 && terminal.room.name != 'W1N27') {
+                    terminal.send(resourceType, terminal.store[resourceType], 'W1N27');
+                }
+                else if ((resourceType == 'Z' || resourceType == 'K') && terminal.store[resourceType] >= 50 && terminal.room.name != 'W4N28' && terminal.room.name != 'W3N28') {
+                    terminal.send(resourceType, terminal.store[resourceType], 'W4N28');
+                }
+            }
         }
 
         //----trans----
@@ -190,14 +238,33 @@ var roleAlchemist = {
                         // console.log('⚗️ A>> to lab3: ' + resourceType);
                         break;
                     }
+                    else if (lab5 && lab7Res == '' && resourceType == lab5Res && lab5.store[resourceType] < 5) {
+                        creep.memory.target = lab5.id;
+                        creep.memory.targetResource = resourceType;
+                        // console.log('⚗️ A>> to lab5: ' + resourceType);
+                        break;
+                    }
+                    else if (lab6 && lab7Res == '' && resourceType == lab6Res && lab6.store[resourceType] < 5) {
+                        creep.memory.target = lab6.id;
+                        creep.memory.targetResource = resourceType;
+                        // console.log('⚗️ A>> to lab6: ' + resourceType);
+                        break;
+                    }
+                    else if (lab7 && lab7Res != '' && resourceType == lab7Res && lab7.store[resourceType] < 5) {
+                        creep.memory.target = lab7.id;
+                        creep.memory.targetResource = resourceType;
+                        // console.log('⚗️ A>> to lab7: ' + resourceType);
+                        break;
+                    }
                     //----fill factory resource----
-                    else if (factoryRes && resourceType == factoryRes && factory.store[resourceType] < 600) {
+                    else if (factoryRes && resourceType == factoryRes && factory.store[resourceType] < 600
+                    && (storage.store[factoryPrd] + terminal.store[factoryPrd] + 100) < ((storage.store[resourceType] + terminal.store[resourceType])/5)) {
                         creep.memory.target = factory.id;
                         creep.memory.targetResource = resourceType;
                         // console.log('⚗️ A>> to factory: ' + resourceType);
                         break;
                     }
-                    else if (factory && resourceType == RESOURCE_ENERGY && factory.store[resourceType] < 200) {
+                    else if (factory && resourceType == RESOURCE_ENERGY && factory.store[resourceType] < 600) {
                         creep.memory.target = factory.id;
                         creep.memory.targetResource = resourceType;
                         // console.log('⚗️ A>> to factory: ' + resourceType);
@@ -223,7 +290,7 @@ var roleAlchemist = {
                     // if (!creep.memory.path) {
                     //     creep.memory.path = creep.pos.findPathTo(target);
                     // }
-                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target), visualizePathStyle: { stroke: '#ffeb0b' } });
+                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target), visualizePathStyle: { stroke: '#ffeb0b', opacity: 0.8} });
                     // creep.moveByPath(creep.memory.path);
                     // creep.say('⚗️>' + target.pos.x + ',' + target.pos.y);
                     // if (creep.memory.path) {
@@ -274,6 +341,24 @@ var roleAlchemist = {
                             // console.log('🧪A>> from storage to lab3: ' + resourceType);
                             break;
                         }
+                        else if (resourceType == lab5Res && lab5.store[resourceType] < 5 && lab7Res == '') { //----lab5 need for reaction----
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            // console.log('🧪A>> from storage to lab1: ' + resourceType);
+                            break;
+                        }
+                        else if (resourceType == lab6Res && lab6.store[resourceType] < 5 && lab7Res == '') { //----lab6 need for reaction----
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            // console.log('🧪A>> from storage to lab2: ' + resourceType);
+                            break;
+                        }
+                        else if (resourceType == lab7Res && lab7.store[resourceType] < 5) { //----lab7 need for revert reaction----
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            // console.log('🧪A>> from storage to lab3: ' + resourceType);
+                            break;
+                        }
                         else if (terminal && terminalRes.includes(' ' + resourceType + ' ') && terminal.store[resourceType] < 10000) { //----terminal need for transfer----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
@@ -292,7 +377,7 @@ var roleAlchemist = {
                             // console.log('🧪A>> from storage tf: ' + resourceType);
                             break;
                         }
-                        else if (factory && resourceType == RESOURCE_ENERGY && factory.store[resourceType] < 200) { //----factory need energy for produce----
+                        else if (factory && resourceType == RESOURCE_ENERGY && factory.store[resourceType] < 600) { //----factory need energy for produce----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
                             // console.log('🧪A>> from storage tfe: ' + resourceType);
@@ -359,14 +444,24 @@ var roleAlchemist = {
                     creep.memory.targetResource = lab4.mineralType;
                     // console.log('🧪A>> from lab4: ' + lab4.mineralType);
                 }
-                // else if (lab5 && lab5.mineralType && (lab3Res != '' || lab5.mineralType != lab5Res)) { //----revert reaction, clear lab5----
-                //     creep.memory.target = lab5.id;
-                //     creep.memory.targetResource = lab5.mineralType;
-                //     console.log('🧪A>> from lab5: ' + lab5.mineralType);
-                // }
                 else if (lab3 && lab3.mineralType && lab3.mineralType != lab3Res) { //----run reaction, clear lab3----
                     creep.memory.target = lab3.id;
                     creep.memory.targetResource = lab3.mineralType;
+                    // console.log('🧪A>> from lab3: ' + lab3.mineralType);
+                }
+                else if (lab5 && lab5.mineralType && (lab7Res != '' || lab5.mineralType != lab5Res)) { //----revert reaction, clear lab5----
+                    creep.memory.target = lab5.id;
+                    creep.memory.targetResource = lab5.mineralType;
+                    // console.log('🧪A>> from lab5: ' + lab5.mineralType);
+                }
+                else if (lab6 && lab6.mineralType && (lab7Res != '' || lab6.mineralType != lab6Res)) { //----revert reaction, clear lab6----
+                    creep.memory.target = lab6.id;
+                    creep.memory.targetResource = lab6.mineralType;
+                    // console.log('🧪A>> from lab6: ' + lab6.mineralType);
+                }
+                else if (lab7 && lab7.mineralType && lab7.mineralType != lab7Res) { //----run reaction, clear lab7----
+                    creep.memory.target = lab7.id;
+                    creep.memory.targetResource = lab7.mineralType;
                     // console.log('🧪A>> from lab3: ' + lab3.mineralType);
                 }
                 else if (labM && labM.mineralType) { //----clear labM----
@@ -397,7 +492,7 @@ var roleAlchemist = {
             if (target) {
                 // console.log('🧪A>> from: ' + target.id + ' take: ' + targetResource);
                 if (target.room != creep.room) {
-                    creep.moveTo(new RoomPosition(25, 25, target.room.name), { reusePath: 30, visualizePathStyle: { stroke: '#ffeb0b' } });
+                    creep.moveTo(new RoomPosition(25, 25, target.room.name), { reusePath: 30, visualizePathStyle: { stroke: '#ffeb0b', opacity: 0.8 } });
                 } else {
                     let result = creep.withdraw(target, targetResource);
                     if (result == ERR_NOT_IN_RANGE) {
@@ -407,6 +502,7 @@ var roleAlchemist = {
                         // creep.moveTo(target, { reusePath: 3, visualizePathStyle: { stroke: '#ffeb0b' } });
                         creep.moveByPath(creep.memory.path);
                         creep.say('🧪>' + target.pos.x + ',' + target.pos.y);
+                        creep.room.visual.line(creep.pos, target.pos, {color: '#ffeb0b', width:0.1, lineStyle: 'dashed'});
                     }
                     else {
                         delete creep.memory.target;
@@ -420,7 +516,7 @@ var roleAlchemist = {
                 delete creep.memory.target;
                 delete creep.memory.targetResource;
                 delete creep.memory.path;
-                creep.say('⚗️ send');
+                creep.say('⚗️ 运送');
             }
         }
     }

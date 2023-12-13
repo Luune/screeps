@@ -14,7 +14,7 @@ var roleUpgrader = {
         //---set status----
         if (creep.memory.upgrading && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.upgrading = false;
-            creep.say('🔄 reload');
+            creep.say('🔄 装填');
         }
         if (!creep.memory.upgrading && creep.store.getFreeCapacity() == 0) {
             creep.memory.upgrading = true;
@@ -23,7 +23,7 @@ var roleUpgrader = {
                 // delete creep.memory.path;
                 creep.memory.path = creep.pos.findPathTo(Game.rooms[creep.memory.loc].controller);
             }
-            creep.say('⚡ upgrade');
+            creep.say('⚡ 升级');
         }
 
         if (!creep.memory.containerIds) {
@@ -64,18 +64,18 @@ var roleUpgrader = {
         }
         if (creep.memory.boosted == '' && creep.ticksToLive > 1200 && creep.memory.boostLab != '') {
             if (Game.getObjectById(creep.memory.boostLab).boostCreep(creep) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(Game.getObjectById(creep.memory.boostLab), { reusePath: 10, visualizePathStyle: { stroke: '#ff3300' } });
+                creep.moveTo(Game.getObjectById(creep.memory.boostLab), { reusePath: 10, visualizePathStyle: { stroke: '#ff3300', opacity: 0.8 } });
             }
         }
         else if (creep.memory.boosted != '' && creep.ticksToLive < 20) {
             if (Game.getObjectById(creep.memory.boostLab).unboostCreep(creep) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(Game.getObjectById(creep.memory.boostLab), { reusePath: 20, visualizePathStyle: { stroke: '#ff3300' } });
+                creep.moveTo(Game.getObjectById(creep.memory.boostLab), { reusePath: 20, visualizePathStyle: { stroke: '#ff3300', opacity: 0.8 } });
             }
         }
         else {
             //----action----
             if (creep.memory.loc != creep.room.name) {
-                creep.moveTo(new RoomPosition(25, 25, creep.memory.loc), { reusePath: 20, visualizePathStyle: { stroke: '#ff3300' } });
+                creep.moveTo(new RoomPosition(25, 25, creep.memory.loc), { reusePath: 20, visualizePathStyle: { stroke: '#ff3300', opacity: 0.8 } });
             } else {
                 if (creep.memory.upgrading) { //----upgrade----
     
@@ -105,6 +105,7 @@ var roleUpgrader = {
                                 creep.memory.path = creep.pos.findPathTo(target);
                             }
                             creep.moveByPath(creep.memory.path);
+                            creep.room.visual.line(creep.pos, target.pos, {color: '#ff3300', width:0.1, lineStyle: 'dotted'});
                             if (creep.memory.path.length > 0) {
                                 // 获取creep的路线
                                 var path = creep.memory.path;
@@ -140,6 +141,7 @@ var roleUpgrader = {
                                 }
                                 creep.moveByPath(creep.memory.path);
                                 creep.say('⚡ E:' + target.amount);
+                                creep.room.visual.line(creep.pos, target.pos, {color: '#ff3300', width:0.1, lineStyle: 'dotted'});
                                 if (creep.memory.path.length > 0) {
                                     // 获取creep的路线
                                     var path = creep.memory.path;
@@ -168,6 +170,7 @@ var roleUpgrader = {
                                     creep.memory.path = creep.pos.findPathTo(target);
                                 }
                                 creep.moveByPath(creep.memory.path);
+                                creep.room.visual.line(creep.pos, target.pos, {color: '#ff3300', width:0.1, lineStyle: 'dotted'});
                             }
                             else {
                                 delete creep.memory.path;

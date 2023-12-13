@@ -7,14 +7,14 @@ var roleTransporter = {
             delete creep.memory.target;
             delete creep.memory.targetResource;
             delete creep.memory.path;
-            creep.say('🚛 loot');
+            creep.say('🚛 收集');
         }
         if (!creep.memory.transporting && creep.store.getFreeCapacity() == 0) {
             creep.memory.transporting = true;
             delete creep.memory.target;
             delete creep.memory.targetResource;
             delete creep.memory.path;
-            creep.say('🚚 transport');
+            creep.say('🚚 运输');
         }
 
         // var closestHostile = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
@@ -95,10 +95,10 @@ var roleTransporter = {
             // 将容器的id写入creep的memory中
             creep.memory.linksToLoot = containersWithEnergy.map(container => container.id);
         }
-        if (!creep.memory.roomStorage) {
+        if (!creep.memory.roomStorage && creep.room.storage) {
             creep.memory.roomStorage = Game.rooms[creep.memory.loc].storage.id;
         }
-        if (!creep.memory.roomTerminal) {
+        if (!creep.memory.roomTerminal && creep.room.terminal) {
             creep.memory.roomTerminal = Game.rooms[creep.memory.loc].terminal.id;
         }
         if (Game.getObjectById(creep.memory.roomTerminal)) {
@@ -228,9 +228,9 @@ var roleTransporter = {
                     //     }
                     // }
                     // creep.moveByPath(creep.memory.path);
-                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#00ff00' } });
+                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#00ff00', opacity:0.8 } });
                     creep.say('🚚 ' + target.pos.x + ',' + target.pos.y);
-                    creep.room.visual.line(creep.pos, target.pos, {color: '#00ff00', width:0.1, lineStyle: 'dashed'});
+                    // creep.room.visual.line(creep.pos, target.pos, {color: '#00ff00', width:0.1, lineStyle: 'dashed'});
                 }
                 else {
                     delete creep.memory.target;
@@ -349,9 +349,9 @@ var roleTransporter = {
                     //     }
                     // }
                     // creep.moveByPath(creep.memory.path);
-                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#00ff00' } });
+                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#00ff00', opacity: 0.8 } });
                     creep.say('🚛' + target.pos.x + ',' + target.pos.y);
-                    creep.room.visual.line(creep.pos, target.pos, {color: '#00ff00', width:0.1, lineStyle: 'dashed'});
+                    // creep.room.visual.line(creep.pos, target.pos, {color: '#00ff00', width:0.1, lineStyle: 'dashed'});
                 }
                 else {
                     delete creep.memory.target;

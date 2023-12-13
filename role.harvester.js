@@ -7,11 +7,15 @@ var roleHarvester = {
         //set job
         if (creep.memory.discharging && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.discharging = false;
-            creep.say('⛏️ harvest');
+            creep.say('⛏️ 采集');
+            delete creep.memory.target;
+            delete creep.memory.path;
         }
         if (!creep.memory.discharging && creep.store.getFreeCapacity() == 0) {
             creep.memory.discharging = true;
-            creep.say('🈵 unload');
+            creep.say('🈵 卸货');
+            delete creep.memory.target;
+            delete creep.memory.path;
         }
         //sign working slot
         if (!creep.memory.workingSlot) {
@@ -36,7 +40,7 @@ var roleHarvester = {
 
         //----action----
         if (creep.room.name != creep.memory.loc) {
-            creep.moveTo(new RoomPosition(25, 25, creep.memory.loc), { reusePath: 20, visualizePathStyle: { stroke: '#ffffff' } });
+            creep.moveTo(new RoomPosition(25, 25, creep.memory.loc), { reusePath: 20, visualizePathStyle: { stroke: '#ffffff', opacity: 0.8 } });
         } else {
             //discharge
             if (creep.memory.discharging) {
@@ -55,7 +59,27 @@ var roleHarvester = {
                 //---- store to link----
                 if (link) {
                     if (creep.transfer(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(link, {reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffffff' } });
+                        // creep.moveTo(link, {reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffffff', opacity: 0.8 } });
+                        if (!creep.memory.path) {
+                            creep.memory.path = creep.pos.findPathTo(link);
+                        }
+                        creep.moveByPath(creep.memory.path);
+                        creep.room.visual.text('⛏️', link.pos, {fontSize:10 });
+                        creep.room.visual.line(creep.pos, link.pos, {color: '#ffffff', width:0.1, lineStyle: 'dotted'});
+                        if (creep.memory.path.length > 0) {
+                            // 获取creep的路线
+                            let path = creep.memory.path;
+                            // 获取下一步位置
+                            let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                            // 在下一步位置查找所有对象
+                            let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
+                            if (objects.length > 0) {
+                                delete creep.memory.path;
+                            }
+                        }
+                        else {
+                            delete creep.memory.path;
+                        }
                     }
                 }
                 else { //----store energy----
@@ -75,22 +99,42 @@ var roleHarvester = {
                 //----drop or store energy----
                 if (target) {
                     let wayToDischarge = creep.pos.getRangeTo(target);
-                    let wayToHarvest = creep.pos.getRangeTo(Game.getObjectById(creep.memory.workingSlot));
-                    creep.say('⛏️ S:' + wayToDischarge + 'W:' + wayToHarvest);
-                    if (wayToDischarge >= wayToHarvest && wayToHarvest > 3) {
+                    // let wayToHarvest = creep.pos.getRangeTo(Game.getObjectById(creep.memory.workingSlot));
+                    creep.say('⛏️ S:' + wayToDischarge );
+                    if (wayToDischarge > 6) {
                         creep.drop(RESOURCE_ENERGY);
                         creep.memory.discharging = false;
-                        creep.say('⛏️ harvest');
+                        creep.say('⛏️ 采集');
                     } else {
                         if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffffff' } });
+                            // creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffffff', opacity: 0.8 } });
+                            if (!creep.memory.path) {
+                                creep.memory.path = creep.pos.findPathTo(target);
+                            }
+                            creep.moveByPath(creep.memory.path);
+                            creep.room.visual.text('⛏️', target.pos, {fontSize:10 });
+                            creep.room.visual.line(creep.pos, target.pos, {color: '#ffffff', width:0.1, lineStyle: 'dotted'});
+                            if (creep.memory.path.length > 0) {
+                                // 获取creep的路线
+                                let path = creep.memory.path;
+                                // 获取下一步位置
+                                let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                // 在下一步位置查找所有对象
+                                let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
+                                if (objects.length > 0) {
+                                    delete creep.memory.path;
+                                }
+                            }
+                            else {
+                                delete creep.memory.path;
+                            }
                         }
                     }
                 }
                 else {
                     creep.drop(RESOURCE_ENERGY);
                     creep.memory.discharging = false;
-                    creep.say('⛏️ harvest');
+                    creep.say('⛏️ 采集');
                 }
             }
             //----harvest----
@@ -104,7 +148,27 @@ var roleHarvester = {
                 // });
 
                 if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffffff' } });
+                    // creep.moveTo(target, {reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffffff', opacity: 0.8 } });
+                    if (!creep.memory.path) {
+                        creep.memory.path = creep.pos.findPathTo(target);
+                    }
+                    creep.moveByPath(creep.memory.path);
+                    creep.room.visual.text('⛏️', target.pos, {fontSize:10 });
+                    creep.room.visual.line(creep.pos, target.pos, {color: '#ffffff', width:0.1, lineStyle: 'dotted'});
+                    if (creep.memory.path.length > 0) {
+                        // 获取creep的路线
+                        let path = creep.memory.path;
+                        // 获取下一步位置
+                        let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                        // 在下一步位置查找所有对象
+                        let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
+                        if (objects.length > 0) {
+                            delete creep.memory.path;
+                        }
+                    }
+                    else {
+                        delete creep.memory.path;
+                    }
                 }
 
                 // if(link.store.getFreeCapacity(RESOURCE_ENERGY)>0){

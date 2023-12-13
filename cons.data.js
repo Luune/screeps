@@ -14,19 +14,19 @@ var consData = {
             'terminals': {
                 //----W2N27----
                 'id1': '6515f9470399d864cad3fd02',
-                'resource1': ' O U G Z K ZH UH KO GO ' + RESOURCE_BATTERY + ' ' + RESOURCE_OXIDANT + ' ',
+                'resource1': ' O U G Z K ZH UH KO GO ' + RESOURCE_OXIDANT + ' ' + RESOURCE_BATTERY + ' ',
                 //----W1N27----
                 'id2': '65332c1f8919c3c4b933b1e8',
-                'resource2': ' L UL ZH UH KO GO ' + RESOURCE_LEMERGIUM_BAR + ' ',
+                'resource2': ' L UL ZH UH KO GO ' + RESOURCE_LEMERGIUM_BAR + ' ' + RESOURCE_BATTERY + ' ',
                 //----W4N28----
                 'id3': '653eba128b9e097d44dd634d',
-                'resource3': ' Z ZH UH KO GO ZK G O H ' + RESOURCE_ZYNTHIUM_BAR + ' ',
+                'resource3': ' Z ZH UH KO GO ZK G O H ' + RESOURCE_ZYNTHIUM_BAR + ' ' + RESOURCE_BATTERY + ' ',
                 //----W5N28----
                 'id4': '655397238fcc1dd66139f651',
-                'resource4': ' H U L Z K O ' + RESOURCE_REDUCTANT + ' ',
+                'resource4': ' H U L Z K O ' + RESOURCE_REDUCTANT + ' ' + RESOURCE_BATTERY + ' ',
                 //----W3N28----
                 'id5': '6569df3de0626d0ba98a5b23',
-                'resource5': ' K ZH UH KO GO ' + RESOURCE_KEANIUM_BAR + ' '
+                'resource5': ' K ZH UH KO GO ' + RESOURCE_KEANIUM_BAR + ' ' + RESOURCE_BATTERY + ' '
             },
             'storages': {
                 'W2N27': {
@@ -47,6 +47,10 @@ var consData = {
                 }, 
                 'W3N28': {
                     'id': '65606acdd59f54caf3c8554c',
+                    'term': {}
+                }, 
+                'W6N28': {
+                    'id': '',
                     'term': {}
                 }
             },
@@ -70,6 +74,18 @@ var consData = {
             'lab4W2N27': {
                 'id': '655f1d56524969095a770702',
                 'resource': 'GH2O' //----for boost----
+            },
+            'lab5W2N27': {
+                'id': '6575fff360a2af2b98390b1e',
+                'resource': 'O' //----for reaction----
+            },
+            'lab6W2N27': {
+                'id': '6576184acfed522641d9414f',
+                'resource': 'H' //----for reaction----
+            },
+            'lab7W2N27': {
+                'id': '65768f70f623bb38c8849b08',
+                'resource': '' //----for revert reaction----
             },
             'factoryW2N27': {
                 'id': '652cec5465fe9b42500b7f10',
@@ -139,7 +155,7 @@ var consData = {
             },
             'lab3W5N28': {
                 'id': '65575cad8deb593a6a4ebbc8',
-                'resource': 'GO' //----for revert reaction----
+                'resource': 'UH' //----for revert reaction----
             },
             'lab4W5N28': {
                 'id': '656dc747b182af372b07d7a7',
@@ -163,6 +179,8 @@ var consData = {
                 'id': '656a01aa7661a4b9449db1a3',
                 'resource': '' //----for revert reaction----
             },
+            //------------------------------------W6N28------------------------------------
+            
         };
         //----view storage stores----
         var stg = Game.getObjectById(Memory.structures.storages.W2N27['id']);

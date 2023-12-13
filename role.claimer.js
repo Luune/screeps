@@ -36,7 +36,7 @@ var roleClaimer = {
             var result = creep.claimController(controller);
             if (result == ERR_NOT_IN_RANGE) {
                 creep.moveTo(controller, { reusePath: 20, visualizePathStyle: { stroke: '#aa0066' } });
-                creep.say('Claim');
+                creep.say('占领');
             }
             else if (result == ERR_GCL_NOT_ENOUGH) {
                 creep.reserveController(controller);
@@ -44,12 +44,12 @@ var roleClaimer = {
             else if (controller.owner && controller.owner.username != 'SybrrLuune') {
                 if (creep.attackController(controller) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(controller, { visualizePathStyle: { stroke: '#aa0066' } });
-                    creep.say('AttCon');
+                    creep.say('攻击控制器');
                 }
             }
             if (!controller.sign && creep.signController(creep.room.controller, "newbie farmer") == ERR_NOT_IN_RANGE) {
                 creep.moveTo(creep.room.controller, { reusePath: 20, visualizePathStyle: { stroke: '#aa0066' } });
-                creep.say('Sign');
+                creep.say('签名');
             }
         }
     }
