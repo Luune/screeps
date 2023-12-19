@@ -1,3 +1,4 @@
+//api reference: https://screeps-cn.github.io/api/
 var consData = require('cons.data');
 var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
@@ -19,11 +20,11 @@ module.exports.loop = function () {
     consData.run();
 
     //----setup trade----
-    var orderId1 = '65703e457ff47a00127fcb4e'; //W2N27 654b2b0c9a89e1324971dea1
-    var orderId2 = '6561aec824d86c001288598e'; //W1N27 654990959a89e11756ee24fd, 655ebe782f944600124ab98d, 6561aec824d86c001288598e
+    var orderId1 = '65703e457ff47a00127fcb4e'; //W2N27 65769bccd464650012064c32, 65703e457ff47a00127fcb4e
+    var orderId2 = '6561aec824d86c001288598e'; //W1N27 655ebe782f944600124ab98d, 6561aec824d86c001288598e
     var orderId3 = '655b2e0ec112ef00129f12ff'; //W4N28 655b2e0ec112ef00129f12ff
-    var orderId4 = '656aba5c77f75f0012f8f88e'; //W5N28 6556d020a0ff73be3616c4ca, 656aba5c77f75f0012f8f88e
-    var orderId5 = '657689bcd464650012000913'; //W3N28 657689bcd464650012000913
+    var orderId4 = '656aba5c77f75f0012f8f88e'; //W5N28 657e85fad464650012bbcf02, 656aba5c77f75f0012f8f88e
+    var orderId5 = '657689bcd464650012000913'; //W3N28 657689bcd464650012000913, 657edcacd464650012d994c3
     // Game.market.deal('6536d07f9a89e1f679c46d5a', 00, 'W2N27');
     var order1 = Game.market.getOrderById(orderId1);
     var order2 = Game.market.getOrderById(orderId2);
@@ -39,7 +40,7 @@ module.exports.loop = function () {
     
     // Game.market.createOrder({ type: ORDER_SELL, resourceType: RESOURCE_UTRIUM_HYDRIDE, price: 100, totalAmount: 1000, roomName: "W2N27" });
     // Game.market.createOrder({ type: ORDER_BUY, resourceType: RESOURCE_HYDROGEN, price: 111, totalAmount: 1000, roomName: "W2N27" });
-    // Game.rooms['W5N28'].terminal.send('energy', 7000, 'W1N27');
+    // Game.rooms['W5N28'].terminal.send('energy', 7000, 'W4N28');
 
     // let goodOrders = Game.market.getAllOrders(order => 
     //     order.resourceType == RESOURCE_OXIDANT &&
@@ -65,7 +66,7 @@ module.exports.loop = function () {
     myRooms.push(room4);
     myRooms.push(room5);
     myRooms.push(room6);
-    reserveRooms.push(room6);
+    // reserveRooms.push(room6);
     // console.log(myRooms);
     var dismantleTarget = ''; //----recycle some buildings for builder----
 
@@ -102,8 +103,8 @@ module.exports.loop = function () {
         let tradeAmount = 2000;
         if (order) {
             tradeAmount = order.remainingAmount;
-            var tradeCost = Game.market.calcTransactionCost(tradeAmount, 'W2N27', order.roomName);
-            console.log(`订单号: ${order.id}, 资源类型: ${order.resourceType}, 房间: ${order.roomName}, 价格: ${order.price}, 数量: ${order.amount}, 剩余: ${order.remainingAmount}, 费能: ${tradeCost} 每 ${tradeAmount}`);
+            // var tradeCost = Game.market.calcTransactionCost(tradeAmount, 'W2N27', order.roomName);
+            // console.log(`订单号: ${order.id}, 资源类型: ${order.resourceType}, 房间: ${order.roomName}, 价格: ${order.price}, 数量: ${order.amount}, 剩余: ${order.remainingAmount}, 费能: ${tradeCost} 每 ${tradeAmount}`);
         }
         
         // console.log(myOrders);
@@ -112,6 +113,20 @@ module.exports.loop = function () {
         if (thisRoom && thisRoom.controller.my) {
             roomLevel = thisRoom.controller.level;
             enAvail = thisRoom.energyAvailable;
+        }
+        //----count extensions storage----
+        let extensionEnergy = 0;
+        let extensions = thisRoom.find(FIND_MY_STRUCTURES, {
+            filter: { structureType: STRUCTURE_EXTENSION }
+        });
+        // if (extensions.length > 0) {
+        //     // var extensionCount = extensions.length;
+        //     var extensionCapacity = extensions[0].store.getCapacity(RESOURCE_ENERGY);
+        //     // console.log(`主>> Room ${roomName} has ${extensionCount} extensions.`);
+        // }
+        let extensionCapacity = EXTENSION_ENERGY_CAPACITY[roomLevel];
+        for (let extension of extensions) {
+            extensionEnergy += extension.store[RESOURCE_ENERGY];
         }
         //----show energy----
         let controllerProgress;
@@ -126,19 +141,7 @@ module.exports.loop = function () {
             controllerProgressTotal = thisRoom.controller.progressTotal;
         }
         console.log('🏰 主>>>>>>>>>> 房间: [' + roomName + '], 等级 ' + roomLevel + ', ' + controllerProgress + '/' + controllerProgressTotal + ' = ' + Math.round(controllerProgress * 100 / controllerProgressTotal) + '%, 孵化能量: ' + enAvail + ' <<<<<<<<<<🏰');
-        //----count extensions storage----
-        let extensionEnergy = 0;
-        let extensions = thisRoom.find(FIND_MY_STRUCTURES, {
-            filter: { structureType: STRUCTURE_EXTENSION }
-        });
-        if (extensions.length > 0) {
-            // var extensionCount = extensions.length;
-            var extensionCapacity = extensions[0].store.getCapacity(RESOURCE_ENERGY);
-            // console.log(`主>> Room ${roomName} has ${extensionCount} extensions.`);
-        }
-        for (let extension of extensions) {
-            extensionEnergy += extension.store[RESOURCE_ENERGY];
-        }
+        
         //----storage of storage----
         let storage = thisRoom.storage;
         if (storage) {
@@ -202,14 +205,24 @@ module.exports.loop = function () {
             console.log('🟡🟡 主>> 墓/废墟资源: ' + tombstones[0] + ': ' + _.sum(tombstones[0].store));
         }
         //----count available harvest spots----
-        let sources = thisRoom.find(FIND_SOURCES);
-        // for (let source of sources) {
+        let totalSources = thisRoom.find(FIND_SOURCES);
+        // let sources = thisRoom.find(FIND_SOURCES, {
+        //     filter: (source) => {
+        //         return source.energy > 0;
+        //     }
+        // });
+        let sources = [];
+        for (let source of totalSources) {
+            if (source.energy > 0) {
+                sources.push(source);
+            }
         //     let countharvester = _.filter(Game.creeps, (creep) => creep.memory.workingSlot == source.id);
         //     console.log('⛏️ 主>> ' + countharvester.length + ' creeps harvesting ' + source);
-        // }
+        }
 
         //----mineral----
         let minerals = thisRoom.find(FIND_MINERALS);
+        let mineral0Amount = minerals[0].mineralAmount;
 
         //----call tower----
         let towers = thisRoom.find(FIND_MY_STRUCTURES, {
@@ -249,7 +262,7 @@ module.exports.loop = function () {
         console.log('🏷️ 主>> 升级虫: ' + upgraders.length + ', WORK:' + totalUpgraderParts + ', 能量-' + totalUpgraderParts + ' |️ 占领虫: ' + claimers.length);
         console.log('🏷️ 主>> 运输虫: ' + transporter.length + ', CARRY:' + totalTransporterParts + ', 运力:' + totalTransporterParts * 50);
         console.log('🏷️ 主>> 建筑虫: ' + builders.length + ', WORK:' + totalBuildParts + ' |️ 战斗虫: ' + fighters.length + ' | 格斗虫: ' + melees.length);
-        console.log('🏷️ 主>> 采矿虫: ' + miners.length + ', WORK:' + totalMineParts + ' |️ 炼金虫: ' + alchemists.length);
+        console.log('🏷️ 主>> 采矿虫: ' + miners.length + ', 矿:' + mineral0Amount + ' |️ 炼金虫: ' + alchemists.length);
 
         //----spawning creeps----
         let spawnName = '';
@@ -265,6 +278,13 @@ module.exports.loop = function () {
             //     s.memory.restTime = 2;
             // }
             // else 
+            //----show spawning----
+            if (s.spawning) {
+                let spawningCreep = Game.creeps[s.spawning.name];
+                s.room.visual.text(
+                    '🛠️' + spawningCreep.memory.role + '-' + s.spawning.remainingTime + '/' + s.spawning.needTime,
+                    s.pos.x + 1, s.pos.y, { align: 'left', opacity: 0.8 });
+            }
             if (thisRoom.find(FIND_HOSTILE_CREEPS).length > 0 && towerEn < 100 && !s.Spawning) {
                 s.memory.restTime = 0;
                 spawnName = s.name;
@@ -293,119 +313,136 @@ module.exports.loop = function () {
         if (spawn.memory.restTime == 0) {
             // console.log('主>> ----spawner: ' + spawnName);
             if (totalWorkParts < sources.length * 5 && thisRoom.controller.my) { //----harvester----
-                if (enAvail >= 900) {
+                if (enAvail >= 1800 && totalSources.length > 1 && storageStorage >= 300000) {
+                    let newName = roomName + '-HvB-' + Game.time;
+                    console.log('主>> 孵化采能虫: ' + newName);
+                    spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
+                    spawn.memory.restTime = 196;
+                } else if (enAvail >= 900) {
                     let newName = roomName + '-Hv-' + Game.time;
                     console.log('主>> 孵化采能虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
-                    spawn.memory.restTime = 183;
+                    spawn.memory.restTime = 163;
                 } else if (enAvail >= 700) {
                     let newName = roomName + '-Hv-' + Game.time;
                     console.log('主>> 孵化采能虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
-                    spawn.memory.restTime = 177;
+                    spawn.memory.restTime = 157;
                 } else if (enAvail >= 500) {
                     let newName = roomName + '-Hv-' + Game.time;
                     console.log('主>> 孵化采能虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
-                    spawn.memory.restTime = 171;
+                    spawn.memory.restTime = 151;
                 } else {
                     let newName = roomName + '-Hv-' + Game.time;
                     console.log('主>> 孵化采能虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'harvester', loc: roomName } });
-                    spawn.memory.restTime = 162;
+                    spawn.memory.restTime = 142;
                 }
             }
-            else if (upgraders.length < upCount && thisRoom.controller.my) { //----upgrader----
-                if (enAvail >= 1500 && sources.length > 1) {
+            else if (upgraders.length < 1 && thisRoom.controller.my) { //----upgrader----
+                if (enAvail >= 2800 && totalSources.length > 1 && upCount == 2) {
+                    let newName = roomName + '-UpB-' + Game.time;
+                    console.log('主>> 孵化升级虫: ' + newName);
+                    spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
+                    spawn.memory.restTime = 232;
+                }
+                else if (enAvail >= 1500 && totalSources.length > 1) {
                     let newName = roomName + '-Up-' + Game.time;
                     console.log('主>> 孵化升级虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
-                    spawn.memory.restTime = 204;
+                    spawn.memory.restTime = 184;
                 } else if (enAvail >= 900) {
                     let newName = roomName + '-Up-' + Game.time;
                     console.log('主>> 孵化升级虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
-                    spawn.memory.restTime = 183;
+                    spawn.memory.restTime = 163;
                 } else if (enAvail >= 650) {
                     let newName = roomName + '-Up-' + Game.time;
                     console.log('主>> 孵化升级虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
-                    spawn.memory.restTime = 174;
+                    spawn.memory.restTime = 154;
                 } else if (enAvail >= 500) {
                     let newName = roomName + '-Up-' + Game.time;
                     console.log('主>> 孵化升级虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
-                    spawn.memory.restTime = 171;
+                    spawn.memory.restTime = 151;
                 } else {
                     let newName = roomName + '-Up-' + Game.time;
                     console.log('主>> 孵化升级虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'upgrader', loc: roomName } });
-                    spawn.memory.restTime = 162;
+                    spawn.memory.restTime = 142;
                 }
             }
             else if (builders.length < 1) { //----builder----
                 if (enAvail >= 1600) {
                     let newName = roomName + '-Bd-' + Game.time;
                     console.log('主>> 孵化建筑虫: ' + newName);
-                    spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
-                    spawn.memory.restTime = 213;
+                    spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
+                    spawn.memory.restTime = 196;
                 }
                 else if (enAvail >= 1200) {
                     let newName = roomName + '-Bd-' + Game.time;
                     console.log('主>> 孵化建筑虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
-                    spawn.memory.restTime = 198;
+                    spawn.memory.restTime = 178;
                 }
                 else if (enAvail >= 900) {
                     let newName = roomName + '-Bd-' + Game.time;
                     console.log('主>> 孵化建筑虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
-                    spawn.memory.restTime = 186;
+                    spawn.memory.restTime = 166;
                 }
-                else if (enAvail >= 500) {
+                else if (enAvail >= 600) {
                     let newName = roomName + '-Bd-' + Game.time;
                     console.log('主>> 孵化建筑虫: ' + newName);
-                    spawn.spawnCreep([WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
-                    spawn.memory.restTime = 171;
+                    spawn.spawnCreep([WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
+                    spawn.memory.restTime = 154;
                 }
                 else {
                     let newName = roomName + '-Bd-' + Game.time;
                     console.log('主>> 孵化建筑虫: ' + newName);
                     spawn.spawnCreep([WORK, WORK, CARRY, MOVE], newName, { memory: { role: 'builder', loc: roomName } });
-                    spawn.memory.restTime = 162;
+                    spawn.memory.restTime = 142;
                 }
             }
-            else if (transporter.length < 2 && thisRoom.controller.my) { //----transporter----
-                if (enAvail >= 1500) {
+            else if (transporter.length < 2 && totalTransporterParts < 16 && thisRoom.controller.my) { //----transporter----
+                // if (enAvail >= 1800) {
+                //     let newName = roomName + '-TrB-' + Game.time;
+                //     console.log('主>> 孵化运输虫: ' + newName);
+                //     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
+                //     spawn.memory.restTime = 246;
+                // } else 
+                if (enAvail >= 1300) {
                     let newName = roomName + '-Tr-' + Game.time;
                     console.log('主>> 孵化运输虫: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 210;
+                    spawn.memory.restTime = 190;
                 } else if (enAvail >= 1000) {
                     let newName = roomName + '-Tr-' + Game.time;
                     console.log('主>> 孵化运输虫: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 198;
+                    spawn.memory.restTime = 178;
                 } else if (enAvail >= 800) {
                     let newName = roomName + '-Tr-' + Game.time;
                     console.log('主>> 孵化运输虫: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 186;
+                    spawn.memory.restTime = 166;
                 } else if (enAvail >= 600) {
                     let newName = roomName + '-Tr-' + Game.time;
                     console.log('主>> 孵化运输虫: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 180;
+                    spawn.memory.restTime = 160;
                 } else if (enAvail >= 400) {
                     let newName = roomName + '-Tr-' + Game.time;
                     console.log('主>> 孵化运输虫: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 174;
+                    spawn.memory.restTime = 154;
                 } else {
                     let newName = roomName + '-Tr-' + Game.time;
                     console.log('主>> 孵化运输虫: ' + newName);
                     spawn.spawnCreep([CARRY, CARRY, MOVE, MOVE], newName, { memory: { role: 'transporter', loc: roomName } });
-                    spawn.memory.restTime = 162;
+                    spawn.memory.restTime = 142;
                 }
             }
             //----claimer----
@@ -414,7 +451,7 @@ module.exports.loop = function () {
                     let newName = roomName + '-Cl-' + Game.time;
                     console.log('主>> 孵化占领虫: ' + newName);
                     spawn.spawnCreep([CLAIM, MOVE], newName, { memory: { role: 'claimer', loc: roomName } });
-                    spawn.memory.restTime = 156;
+                    spawn.memory.restTime = 136;
                 }
             }
             //----fighter----
@@ -457,23 +494,23 @@ module.exports.loop = function () {
                 // 判断矿物上是否已经建造了Extractor
                 let extractors = mineral.pos.lookFor(LOOK_STRUCTURES, { filter: { structureType: STRUCTURE_EXTRACTOR } });
                 if (extractors.length > 0 && mineral.mineralAmount > 0) {
-                    console.log(`主>> 矿物 ${mineral.mineralType} 可以采集 ${mineral.mineralAmount}`);
+                    // console.log(`主>> 矿物 ${mineral.mineralType} 可以采集 ${mineral.mineralAmount}`);
                     if (miners.length < 1) {
                         if (enAvail >= 1600) {
                             let newName = roomName + '-Mn-' + Game.time;
                             console.log('主>> 孵化采矿虫: ' + newName);
                             spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE], newName, { memory: { role: 'miner', loc: roomName } });
-                            spawn.memory.restTime = 195;
+                            spawn.memory.restTime = 175;
                         }
                         else if (enAvail >= 800) {
                             let newName = roomName + '-Mn-' + Game.time;
                             console.log('主>> 孵化采矿虫: ' + newName);
                             spawn.spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName, { memory: { role: 'miner', loc: roomName } });
-                            spawn.memory.restTime = 177;
+                            spawn.memory.restTime = 157;
                         }
                     }
                 } else {
-                    console.log(`主>> 矿物 ${mineral.mineralType} 上尚未建造Extractor`);
+                    // console.log(`主>> 矿物 ${mineral.mineralType} 上尚未建造Extractor`);
                 }
             }
             //----alchemist----
@@ -486,21 +523,11 @@ module.exports.loop = function () {
                 let newName = roomName + '-Al-' + Game.time;
                 console.log('主>> 孵化炼金虫: ' + newName);
                 spawn.spawnCreep([CARRY, CARRY, MOVE], newName, { memory: { role: 'alchemist', loc: roomName } });
-                spawn.memory.restTime = 159;
+                spawn.memory.restTime = 139;
             }
         }
 
-        //----show spawning----
-        if (spawn.spawning) {
-            let spawningCreep = Game.creeps[spawn.spawning.name];
-            spawn.room.visual.text(
-                '🛠️' + spawningCreep.memory.role + '-' + spawn.spawning.remainingTime + '/' + spawn.spawning.needTime,
-                spawn.pos.x + 1,
-                spawn.pos.y,
-                { align: 'left', opacity: 0.8 });
-        }
-
-        var age = 1500;
+        var age = CREEP_LIFE_TIME;
         //----call creeps to work----
         for (let creepName in Game.creeps) {
             let creep = Game.creeps[creepName];
@@ -536,7 +563,7 @@ module.exports.loop = function () {
                         var workResult = roleMiner.run(creep, roomName, minerals);
                         break;
                     case 'alchemist':
-                        var workResult = roleAlchemist.run(creep, roomName, order, tradeAmount, tradeCost);
+                        var workResult = roleAlchemist.run(creep, roomName, order, tradeAmount);
                         break;
                     case 'melee':
                         var workResult = roleMelee.run(creep, roomName, dismantleTarget);
@@ -613,9 +640,9 @@ module.exports.loop = function () {
     // console.log('container ' + Game.getObjectById('650040e2dbe835a751c7c705').storage.store[RESOURCE_ENERGY] );
     // console.log(Game.getObjectById('65052ea2c34196660d3e9925').store[RESOURCE_OXYGEN]);
 
-    console.log('💻 CPU in bucket: ' + Game.cpu.bucket);
-    // if (Game.cpu.bucket >= 10000) {
-    //     Game.cpu.generatePixel();
-    // }
+    console.log('💻 CPU 桶: ' + Game.cpu.bucket);
+    if (Game.cpu.bucket >= 10000) {
+        Game.cpu.generatePixel();
+    }
     //----test end----
 }

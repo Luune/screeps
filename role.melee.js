@@ -23,7 +23,7 @@ var roleMelee = {
         // console.log('⚔️ F: whitelist' + Memory.whiteList);
         // creep.memory.destiny = 'W3N28';
         if (creep.room.name != creep.memory.destiny) {
-            creep.say('F' + creep.memory.destiny);
+            creep.say('F:' + creep.memory.destiny);
             creep.moveTo(new RoomPosition(25, 25, creep.memory.destiny));
         } else {
             //----attack creep----
@@ -48,17 +48,17 @@ var roleMelee = {
                     var closestTarget = creep.pos.findClosestByRange(targets);
                     creep.say('🔥 ' + closestTarget.owner.username);
                     if (creep.attack(closestTarget) != 0) {
-                            creep.moveTo(closestTarget, { visualizePathStyle: { stroke: '#ff00ff' } });
+                        creep.moveTo(closestTarget, { visualizePathStyle: { stroke: '#ff00ff' } });
                     }
                 }
                 else if (dismantleTargetId != '') {
-                        var target = Game.getObjectById(dismantleTargetId);
-                        if (target.room.name == creep.memory.destiny) {
-                            if (creep.attack(target) != 0) { 
-                                    creep.moveTo(target, { visualizePathStyle: { stroke: '#ff00ff' } });
-                            }
+                    var target = Game.getObjectById(dismantleTargetId);
+                    if (target.room.name == creep.memory.destiny) {
+                        if (creep.attack(target) != 0) {
+                            creep.moveTo(target, { visualizePathStyle: { stroke: '#ff00ff' } });
                         }
                     }
+                }
                 else { //----heal----
                     var closestWoundedCreep = creep.pos.findClosestByRange(FIND_MY_CREEPS,
                         { filter: (creep) => creep.hits < creep.hitsMax });
@@ -68,7 +68,7 @@ var roleMelee = {
                         if (creep.pos.isNearTo(closestWoundedCreep)) { creep.heal(closestWoundedCreep); }
                         else { creep.rangedHeal(closestWoundedCreep); }
                     }
-                    
+
                     else {
                         creep.moveTo(Game.rooms[creep.memory.destiny].controller, { range: 5, visualizePathStyle: { stroke: '#ff00ff' } });
                     }

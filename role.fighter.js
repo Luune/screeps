@@ -70,18 +70,18 @@ var roleFighter = {
                     }
                 }
                 else if (dismantleTargetId != '') {
-                        var target = Game.getObjectById(dismantleTargetId);
-                        if (target.room.name == creep.memory.destiny) {
-                            if (creep.attack(target) != 0) { //creep.rangedAttack(target) != 0 || 
-                                // 如果没有敌对creep在射程范围内，请移动到最近的敌对creep附近并保持3格距离
-                                var distanceToTarget = creep.pos.getRangeTo(target);
-                                if (distanceToTarget > 0) {
-                                    // 如果creep与敌对creep的距离大于3，请向敌对creep移动并保持3格距离
-                                    creep.moveTo(target, { range: 0, visualizePathStyle: { stroke: '#ff00ff' } });
-                                }
+                    var target = Game.getObjectById(dismantleTargetId);
+                    if (target.room.name == creep.memory.destiny) {
+                        if (creep.attack(target) != 0) { //creep.rangedAttack(target) != 0 || 
+                            // 如果没有敌对creep在射程范围内，请移动到最近的敌对creep附近并保持3格距离
+                            var distanceToTarget = creep.pos.getRangeTo(target);
+                            if (distanceToTarget > 0) {
+                                // 如果creep与敌对creep的距离大于3，请向敌对creep移动并保持3格距离
+                                creep.moveTo(target, { range: 0, visualizePathStyle: { stroke: '#ff00ff' } });
                             }
                         }
                     }
+                }
                 else { //----heal----
                     var closestWoundedCreep = creep.pos.findClosestByRange(FIND_MY_CREEPS,
                         { filter: (creep) => creep.hits < creep.hitsMax });
@@ -91,7 +91,7 @@ var roleFighter = {
                         if (creep.pos.isNearTo(closestWoundedCreep)) { creep.heal(closestWoundedCreep); }
                         else { creep.rangedHeal(closestWoundedCreep); }
                     }
-                    
+
                     else {
                         creep.moveTo(Game.rooms[creep.memory.destiny].controller, { range: 6, visualizePathStyle: { stroke: '#ff00ff' } });
                     }

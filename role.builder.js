@@ -43,7 +43,7 @@ var roleBuilder = {
             //     }
             // }
             //----build----
-            var target = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+            var target = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
             if (target) {
                 delete creep.memory.path;
                 delete creep.memory.target;
@@ -55,8 +55,8 @@ var roleBuilder = {
                     }
                     creep.moveByPath(creep.memory.path);
                     creep.say('🛠️ 建造');
-                    creep.room.visual.text('🚧', target.pos, {fontSize:10 });
-                    creep.room.visual.line(creep.pos, target.pos, {color: '#0099ff', width:0.1, lineStyle: 'dotted'});
+                    creep.room.visual.text('🚧', target.pos, { fontSize: 10 });
+                    creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.1, lineStyle: 'dotted' });
                     if (creep.memory.path.length > 0) {
                         // 获取creep的路线
                         let path = creep.memory.path;
@@ -94,8 +94,8 @@ var roleBuilder = {
                         }
                         creep.moveByPath(creep.memory.path);
                         creep.say('🚧 填充防御塔');
-                        creep.room.visual.text('🚧', target.pos, {fontSize:10 });
-                        creep.room.visual.line(creep.pos, target.pos, {color: '#0099ff', width:0.1, lineStyle: 'dotted'});
+                        creep.room.visual.text('🚧', target.pos, { fontSize: 10 });
+                        creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.1, lineStyle: 'dotted' });
                         if (creep.memory.path.length > 0) {
                             // 获取creep的路线
                             let path = creep.memory.path;
@@ -116,13 +116,12 @@ var roleBuilder = {
                     if (!creep.memory.target) {
                         let damagedStructures = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
                             filter: (structure) => {
-                                return (structure.structureType == STRUCTURE_CONTAINER ||
-                                    structure.structureType == STRUCTURE_TOWER ||
-                                    (structure.structureType == STRUCTURE_RAMPART && structure.hits < ((structure.room.controller.level * 10000) + storageStorage * 10)) ||
-                                    structure.structureType == STRUCTURE_LINK ||
-                                    structure.structureType == STRUCTURE_ROAD ||
-                                    (structure.structureType == STRUCTURE_WALL && structure.hits < ((structure.room.controller.level * 10000) + storageStorage * 10))) &&
-                                    structure.hits < structure.hitsMax;
+                                return (structure.hits < structure.hitsMax
+                                    && structure.structureType != STRUCTURE_WALL
+                                    && structure.structureType != STRUCTURE_RAMPART)
+                                || (structure.hits < structure.hitsMax
+                                    && (structure.structureType == STRUCTURE_WALL || structure.structureType == STRUCTURE_RAMPART)
+                                    && structure.hits < ((structure.room.controller.level * 10000) + storageStorage * 10));
                             }
                         });
                         if (damagedStructures.length > 0) {
@@ -131,8 +130,8 @@ var roleBuilder = {
                         delete creep.memory.path;
                     }
                     target = Game.getObjectById(creep.memory.target);
-                    if (target) {
-                        creep.room.visual.text('🚧', target.pos, {fontSize:10 });
+                    if (target && target.hits < target.hitsMax) {
+                        creep.room.visual.text('🚧', target.pos, { fontSize: 10 });
                         let result = creep.repair(target);
                         if (result == ERR_NOT_IN_RANGE) {
                             if (!creep.memory.path) {
@@ -140,7 +139,7 @@ var roleBuilder = {
                             }
                             creep.moveByPath(creep.memory.path);
                             creep.say('🛠️ 修理');
-                            creep.room.visual.line(creep.pos, target.pos, {color: '#0099ff', width:0.1, lineStyle: 'dotted'});
+                            creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.1, lineStyle: 'dotted' });
                             if (creep.memory.path.length > 0) {
                                 // 获取creep的路线
                                 let path = creep.memory.path;
@@ -161,6 +160,10 @@ var roleBuilder = {
                             delete creep.memory.path;
                         }
                     }
+                    else {
+                        delete creep.memory.target;
+                        delete creep.memory.path;
+                    }
                 }
             }
         }
@@ -175,7 +178,7 @@ var roleBuilder = {
             }
             if (target && target.room.name == creep.memory.loc) {
                 if (creep.dismantle(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#0099ff', opacity: 0.8 } });
+                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target) / 2, visualizePathStyle: { stroke: '#0099ff', opacity: 0.8 } });
                 }
             }
             else {
@@ -196,8 +199,8 @@ var roleBuilder = {
                         }
                         creep.moveByPath(creep.memory.path);
                         creep.say('🚧捡:' + target.amount);
-                        creep.room.visual.text('🚧', target.pos, {fontSize:10 });
-                        creep.room.visual.line(creep.pos, target.pos, {color: '#0099ff', width:0.1, lineStyle: 'dotted'});
+                        creep.room.visual.text('🚧', target.pos, { fontSize: 10 });
+                        creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.1, lineStyle: 'dotted' });
                         if (creep.memory.path.length > 0) {
                             // 获取creep的路线
                             let path = creep.memory.path;
@@ -220,7 +223,7 @@ var roleBuilder = {
                         filter: (structure) => {
                             return (structure.structureType == STRUCTURE_CONTAINER
                                 // || structure.structureType == STRUCTURE_LINK
-                                )
+                            )
                                 && structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50;
                         }
                     });
@@ -234,8 +237,8 @@ var roleBuilder = {
                             }
                             creep.moveByPath(creep.memory.path);
                             creep.say('🚧容器:' + target.pos.x + ',' + target.pos.y);
-                            creep.room.visual.text('🚧', target.pos, {fontSize:10 });
-                            creep.room.visual.line(creep.pos, target.pos, {color: '#0099ff', width:0.1, lineStyle: 'dotted'});
+                            creep.room.visual.text('🚧', target.pos, { fontSize: 10 });
+                            creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.1, lineStyle: 'dotted' });
                             if (creep.memory.path.length > 0) {
                                 // 获取creep的路线
                                 let path = creep.memory.path;
@@ -269,8 +272,8 @@ var roleBuilder = {
                                 }
                                 creep.moveByPath(creep.memory.path);
                                 creep.say('🚧仓库:' + target.pos.x + ',' + target.pos.y);
-                                creep.room.visual.text('🚧', target.pos, {fontSize:10 });
-                                creep.room.visual.line(creep.pos, target.pos, {color: '#0099ff', width:0.1, lineStyle: 'dotted'});
+                                creep.room.visual.text('🚧', target.pos, { fontSize: 10 });
+                                creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.1, lineStyle: 'dotted' });
                                 if (creep.memory.path.length > 0) {
                                     // 获取creep的路线
                                     let path = creep.memory.path;
@@ -298,8 +301,8 @@ var roleBuilder = {
                                 }
                                 creep.moveByPath(creep.memory.path);
                                 creep.say('🚧B>采集');
-                                creep.room.visual.text('🚧', target.pos, {fontSize:10 });
-                                creep.room.visual.line(creep.pos, target.pos, {color: '#0099ff', width:0.1, lineStyle: 'dotted'});
+                                creep.room.visual.text('🚧', target.pos, { fontSize: 10 });
+                                creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.1, lineStyle: 'dotted' });
                                 if (creep.memory.path.length > 0) {
                                     // 获取creep的路线
                                     let path = creep.memory.path;

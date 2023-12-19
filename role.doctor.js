@@ -15,12 +15,12 @@ var roleDoctor = {
             var target = patient;
         }
         else {
-        //----heal----
-        var target = creep.pos.findClosestByRange(FIND_MY_CREEPS,
-            { filter: (creep) => creep.hits < creep.hitsMax });
+            //----heal----
+            var target = creep.pos.findClosestByRange(FIND_MY_CREEPS,
+                { filter: (creep) => creep.hits < creep.hitsMax });
         }
         if (target) {
-            creep.say('🚑 '+ target);
+            creep.say('🚑 ' + target);
             creep.moveTo(target, { visualizePathStyle: { stroke: '#ff00ff' } });
             if (creep.pos.isNearTo(target)) { creep.heal(target); }
             else { creep.rangedHeal(target); }

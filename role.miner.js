@@ -55,7 +55,7 @@ var roleMiner = {
                 });
             }
             if (creep.transfer(target, creep.memory.miningType) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffff00' } });
+                creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target) / 2, visualizePathStyle: { stroke: '#ffff00' } });
             }
         }
         else { //----mining----
@@ -64,7 +64,7 @@ var roleMiner = {
                 creep.moveTo(new RoomPosition(25, 25, creep.memory.loc), { reusePath: 20 });
             } else {
                 if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffff00' } });
+                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target) / 2, visualizePathStyle: { stroke: '#ffff00' } });
                 }
                 if (target.mineralAmount == 0) {
                     if (creep.pos.getRangeTo(creep.room.storage) <= 3) {

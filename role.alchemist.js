@@ -8,7 +8,7 @@
  */
 
 var roleAlchemist = {
-    run: function (creep, roomName, order, tradeAmount, tradeCost) {
+    run: function (creep, roomName, order, tradeAmount) {
         //----set status----
         if (creep.memory.transporting && creep.store.getUsedCapacity() == 0) {
             creep.memory.transporting = false;
@@ -29,28 +29,32 @@ var roleAlchemist = {
                 var labM = Game.getObjectById(Memory.structures.labMW2N27['id']);
                 var lab1 = Game.getObjectById(Memory.structures.lab1W2N27['id']);
                 var lab1Res = Memory.structures.lab1W2N27['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab1Res, lab1.pos.x, lab1.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab1Res, lab1.pos.x, lab1.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab2 = Game.getObjectById(Memory.structures.lab2W2N27['id']);
                 var lab2Res = Memory.structures.lab2W2N27['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab2Res, lab2.pos.x, lab2.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab2Res, lab2.pos.x, lab2.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab3 = Game.getObjectById(Memory.structures.lab3W2N27['id']);
                 var lab3Res = Memory.structures.lab3W2N27['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab3Res, lab3.pos.x, lab3.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab3Res, lab3.pos.x, lab3.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab4 = Game.getObjectById(Memory.structures.lab4W2N27['id']);
                 var lab4Res = Memory.structures.lab4W2N27['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab4Res, lab4.pos.x, lab4.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab4Res, lab4.pos.x, lab4.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab5 = Game.getObjectById(Memory.structures.lab5W2N27['id']);
                 var lab5Res = Memory.structures.lab5W2N27['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab5Res, lab5.pos.x, lab5.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab5Res, lab5.pos.x, lab5.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab6 = Game.getObjectById(Memory.structures.lab6W2N27['id']);
                 var lab6Res = Memory.structures.lab6W2N27['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab6Res, lab6.pos.x, lab6.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab6Res, lab6.pos.x, lab6.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab7 = Game.getObjectById(Memory.structures.lab7W2N27['id']);
                 var lab7Res = Memory.structures.lab7W2N27['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab7Res, lab7.pos.x, lab7.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab7Res, lab7.pos.x, lab7.pos.y + 0.1, { color: 'black', font: 0.5 });
+                var lab8 = Game.getObjectById(Memory.structures.lab8W2N27['id']);
+                var lab8Res = Memory.structures.lab8W2N27['resource'];
+                Game.rooms[creep.memory.loc].visual.text(lab8Res, lab8.pos.x, lab8.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var factory = Game.getObjectById(Memory.structures.factoryW2N27['id']);
                 var factoryRes = Memory.structures.factoryW2N27['resource'];
                 var factoryPrd = Memory.structures.factoryW2N27['prod'];
+                var nuker = Game.getObjectById('657061da8cfbe564237930dc');
                 break;
             case 'W1N27':
                 var storage = Game.getObjectById(Memory.structures.storages.W1N27['id']);
@@ -59,13 +63,13 @@ var roleAlchemist = {
                 var labM = Game.getObjectById(Memory.structures.labMW1N27['id']);
                 var lab1 = Game.getObjectById(Memory.structures.lab1W1N27['id']);
                 var lab1Res = Memory.structures.lab1W1N27['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab1Res, lab1.pos.x, lab1.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab1Res, lab1.pos.x, lab1.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab2 = Game.getObjectById(Memory.structures.lab2W1N27['id']);
                 var lab2Res = Memory.structures.lab2W1N27['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab2Res, lab2.pos.x, lab2.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab2Res, lab2.pos.x, lab2.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab3 = Game.getObjectById(Memory.structures.lab3W1N27['id']);
                 var lab3Res = Memory.structures.lab3W1N27['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab3Res, lab3.pos.x, lab3.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab3Res, lab3.pos.x, lab3.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var factory = Game.getObjectById(Memory.structures.factoryW1N27['id']);
                 var factoryRes = Memory.structures.factoryW1N27['resource'];
                 var factoryPrd = Memory.structures.factoryW1N27['prod'];
@@ -77,16 +81,16 @@ var roleAlchemist = {
                 var labM = Game.getObjectById(Memory.structures.labMW4N28['id']);
                 var lab1 = Game.getObjectById(Memory.structures.lab1W4N28['id']);
                 var lab1Res = Memory.structures.lab1W4N28['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab1Res, lab1.pos.x, lab1.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab1Res, lab1.pos.x, lab1.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab2 = Game.getObjectById(Memory.structures.lab2W4N28['id']);
                 var lab2Res = Memory.structures.lab2W4N28['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab2Res, lab2.pos.x, lab2.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab2Res, lab2.pos.x, lab2.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab3 = Game.getObjectById(Memory.structures.lab3W4N28['id']);
                 var lab3Res = Memory.structures.lab3W4N28['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab3Res, lab3.pos.x, lab3.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab3Res, lab3.pos.x, lab3.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab4 = Game.getObjectById(Memory.structures.lab4W4N28['id']);
                 var lab4Res = Memory.structures.lab4W4N28['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab4Res, lab4.pos.x, lab4.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab4Res, lab4.pos.x, lab4.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var factory = Game.getObjectById(Memory.structures.factoryW4N28['id']);
                 var factoryRes = Memory.structures.factoryW4N28['resource'];
                 var factoryPrd = Memory.structures.factoryW4N28['prod'];
@@ -98,16 +102,16 @@ var roleAlchemist = {
                 var labM = Game.getObjectById(Memory.structures.labMW5N28['id']);
                 var lab1 = Game.getObjectById(Memory.structures.lab1W5N28['id']);
                 var lab1Res = Memory.structures.lab1W5N28['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab1Res, lab1.pos.x, lab1.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab1Res, lab1.pos.x, lab1.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab2 = Game.getObjectById(Memory.structures.lab2W5N28['id']);
                 var lab2Res = Memory.structures.lab2W5N28['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab2Res, lab2.pos.x, lab2.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab2Res, lab2.pos.x, lab2.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab3 = Game.getObjectById(Memory.structures.lab3W5N28['id']);
                 var lab3Res = Memory.structures.lab3W5N28['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab3Res, lab3.pos.x, lab3.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab3Res, lab3.pos.x, lab3.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab4 = Game.getObjectById(Memory.structures.lab4W5N28['id']);
                 var lab4Res = Memory.structures.lab4W5N28['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab4Res, lab4.pos.x, lab4.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab4Res, lab4.pos.x, lab4.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var factory = Game.getObjectById(Memory.structures.factoryW5N28['id']);
                 var factoryRes = Memory.structures.factoryW5N28['resource'];
                 var factoryPrd = Memory.structures.factoryW5N28['prod'];
@@ -119,15 +123,43 @@ var roleAlchemist = {
                 var labM = Game.getObjectById(Memory.structures.labMW3N28['id']);
                 var lab1 = Game.getObjectById(Memory.structures.lab1W3N28['id']);
                 var lab1Res = Memory.structures.lab1W3N28['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab1Res, lab1.pos.x, lab1.pos.y+0.1 , { color: 'black', font: 0.5 });
-                
+                Game.rooms[creep.memory.loc].visual.text(lab1Res, lab1.pos.x, lab1.pos.y + 0.1, { color: 'black', font: 0.5 });
+                var lab2 = Game.getObjectById(Memory.structures.lab2W3N28['id']);
+                var lab2Res = Memory.structures.lab2W3N28['resource'];
+                Game.rooms[creep.memory.loc].visual.text(lab2Res, lab2.pos.x, lab2.pos.y + 0.1, { color: 'black', font: 0.5 });
                 var lab3 = Game.getObjectById(Memory.structures.lab3W3N28['id']);
                 var lab3Res = Memory.structures.lab3W3N28['resource'];
-                Game.rooms[creep.memory.loc].visual.text(lab3Res, lab3.pos.x, lab3.pos.y+0.1 , { color: 'black', font: 0.5 });
+                Game.rooms[creep.memory.loc].visual.text(lab3Res, lab3.pos.x, lab3.pos.y + 0.1, { color: 'black', font: 0.5 });
+                var lab4 = Game.getObjectById(Memory.structures.lab4W3N28['id']);
+                var lab4Res = Memory.structures.lab4W3N28['resource'];
+                Game.rooms[creep.memory.loc].visual.text(lab4Res, lab4.pos.x, lab4.pos.y + 0.1, { color: 'black', font: 0.5 });
+                var factory = Game.getObjectById(Memory.structures.factoryW3N28['id']);
+                var factoryRes = Memory.structures.factoryW3N28['resource'];
+                var factoryPrd = Memory.structures.factoryW3N28['prod'];
+                break;
+            case 'W6N28':
+                var storage = Game.getObjectById(Memory.structures.storages.W6N28['id']);
                 break;
         }
-        
+
+        if (creep.memory.loc == 'W5N28') {
+            for (let resourceType in storage.store) {
+                if ((resourceType == 'ZH' || resourceType == 'UH' || resourceType == 'KO' || resourceType == 'GO') && storage.store[resourceType] >= 5) {
+                    lab3Res = resourceType;
+                    break;
+                }
+            }
+        }
         //----run labs----
+        // if (lab8) {
+        //     if (lab8Res == '' && lab3Res != '' && lab7Res != '') {
+        //         lab8.runReaction(lab3,lab7);
+        //     }
+        //     else {
+        //         lab8.reverseReaction(lab3,lab7);
+        //     }
+        // }
+        // else {
         if (lab3) {
             if (lab3Res == '') {
                 if (lab1 && lab1Res != '' && lab2 && lab2Res != '') {
@@ -148,37 +180,45 @@ var roleAlchemist = {
                 lab7.reverseReaction(lab5, lab6);
             }
         }
-        
+        // }
+
         //----run factory----
         if (factory && factory.store[factoryRes] >= 500
-        && (storage.store[factoryPrd] + terminal.store[factoryPrd] + 100) * 5 < (storage.store[factoryRes] + terminal.store[factoryRes])) {
+            && (storage.store[factoryPrd] + terminal.store[factoryPrd]) * 5 < (storage.store[factoryRes] + terminal.store[factoryRes])) {
             var result = factory.produce(factoryPrd);
             // console.log(result);
         }
-        else if (factory 
-        && (storage.store[factoryPrd] + terminal.store[factoryPrd] + 100) * 5 >= (storage.store[factoryRes] + terminal.store[factoryRes]) 
-        && storage.store[RESOURCE_ENERGY] > 600000
-        && storage.store[RESOURCE_BATTERY] < 30000) {
+        else if (factory
+            && (storage.store[factoryPrd] + terminal.store[factoryPrd] + 100) * 5 >= (storage.store[factoryRes] + terminal.store[factoryRes])
+            && storage.store[RESOURCE_ENERGY] + terminal.store[RESOURCE_ENERGY] > 600000
+            && storage.store[RESOURCE_BATTERY] + terminal.store[RESOURCE_ENERGY] < 30000) {
             var result = factory.produce(RESOURCE_BATTERY);
         }
-        
+
         //----run terminal----
         if (terminal) {
             for (resourceType in terminal.store) {
-                if ((resourceType == 'ZH' || resourceType == 'UH' || resourceType == 'KO' || resourceType == 'GO') && terminal.room.name != 'W5N28') {
+                if (
+                    (resourceType == 'ZH' || resourceType == 'UH' || resourceType == 'KO' || resourceType == 'GO' || resourceType == 'LO' 
+                        || (resourceType == 'G' && terminal.store[resourceType] >= 50)
+                    ) 
+                    && terminal.room.name != 'W5N28') {
                     terminal.send(resourceType, terminal.store[resourceType], 'W5N28');
                 }
-                else if ((resourceType == 'ZK' || resourceType == 'UL') && terminal.store[resourceType] >= 50 && terminal.room.name != 'W2N27') {
+                else if ((resourceType == 'ZK' || resourceType == 'UL' || resourceType == 'O') && terminal.store[resourceType] >= 50 && terminal.room.name != 'W2N27') {
                     terminal.send(resourceType, terminal.store[resourceType], 'W2N27');
                 }
                 else if ((resourceType == RESOURCE_BATTERY) && terminal.store[resourceType] >= 500 && terminal.room.name != 'W2N27') {
                     terminal.send(resourceType, terminal.store[resourceType], 'W2N27');
                 }
-                else if ((resourceType == 'U' || resourceType == 'L') && terminal.store[resourceType] >= 50 && terminal.room.name != 'W1N27') {
+                else if ((resourceType == 'U' || resourceType == 'L') && terminal.store[resourceType] >= 50 && terminal.room.name != 'W1N27' && terminal.room.name != 'W6N28') {
                     terminal.send(resourceType, terminal.store[resourceType], 'W1N27');
                 }
                 else if ((resourceType == 'Z' || resourceType == 'K') && terminal.store[resourceType] >= 50 && terminal.room.name != 'W4N28' && terminal.room.name != 'W3N28') {
                     terminal.send(resourceType, terminal.store[resourceType], 'W4N28');
+                }
+                else if ((resourceType == 'GH' || resourceType == 'OH') && terminal.store[resourceType] >= 50 && terminal.room.name != 'W3N28') {
+                    terminal.send(resourceType, terminal.store[resourceType], 'W3N28');
                 }
             }
         }
@@ -192,6 +232,13 @@ var roleAlchemist = {
                         creep.memory.target = terminal.id;
                         creep.memory.targetResource = resourceType;
                         // console.log('⚗️ A>> to terminal: ' + resourceType);
+                        break;
+                    }
+                    //----fill nuker----
+                    else if (nuker && resourceType == RESOURCE_GHODIUM && nuker.store.getFreeCapacity(RESOURCE_GHODIUM) > 0) {
+                        creep.memory.target = nuker.id;
+                        creep.memory.targetResource = resourceType;
+                        // console.log('⚗️ A>> to factory: ' + resourceType);
                         break;
                     }
                     //----fill terminal transfer----
@@ -220,16 +267,10 @@ var roleAlchemist = {
                         // console.log('⚗️ A>> to lab2: ' + resourceType);
                         break;
                     }
-                    else if (lab3Res == '' && resourceType == lab4Res && lab4.store[resourceType] < 5) {
+                    else if (lab4 && resourceType == lab4Res && lab4.store[resourceType] < 1000) {
                         creep.memory.target = lab4.id;
                         creep.memory.targetResource = resourceType;
                         // console.log('⚗️ A>> to lab4: ' + resourceType);
-                        break;
-                    }
-                    else if (lab4 && resourceType == lab4Res && lab4.store[resourceType] < 400) {
-                        creep.memory.target = lab4.id;
-                        creep.memory.targetResource = resourceType;
-                        // console.log('⚗️ A>> to lab5: ' + resourceType);
                         break;
                     }
                     else if (lab3 && lab3Res != '' && resourceType == lab3Res && lab3.store[resourceType] < 5) {
@@ -258,7 +299,7 @@ var roleAlchemist = {
                     }
                     //----fill factory resource----
                     else if (factoryRes && resourceType == factoryRes && factory.store[resourceType] < 600
-                    && (storage.store[factoryPrd] + terminal.store[factoryPrd] + 100) < ((storage.store[resourceType] + terminal.store[resourceType])/5)) {
+                        && (storage.store[factoryPrd] + terminal.store[factoryPrd]) * 5 < (storage.store[resourceType] + terminal.store[resourceType] + 100)) {
                         creep.memory.target = factory.id;
                         creep.memory.targetResource = resourceType;
                         // console.log('⚗️ A>> to factory: ' + resourceType);
@@ -290,7 +331,7 @@ var roleAlchemist = {
                     // if (!creep.memory.path) {
                     //     creep.memory.path = creep.pos.findPathTo(target);
                     // }
-                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target), visualizePathStyle: { stroke: '#ffeb0b', opacity: 0.8} });
+                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target), visualizePathStyle: { stroke: '#ffeb0b', opacity: 0.8 } });
                     // creep.moveByPath(creep.memory.path);
                     // creep.say('⚗️>' + target.pos.x + ',' + target.pos.y);
                     // if (creep.memory.path) {
@@ -329,7 +370,7 @@ var roleAlchemist = {
                             // console.log('🧪A>> from storage to lab2: ' + resourceType);
                             break;
                         }
-                        else if (resourceType == lab4Res && lab4.store[resourceType] < 300) { //----lab4 need for boost----
+                        else if (resourceType == lab4Res && lab4.store[resourceType] < 700) { //----lab4 need for boost----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
                             // console.log('🧪A>> from storage to lab4: ' + resourceType);
@@ -359,6 +400,12 @@ var roleAlchemist = {
                             // console.log('🧪A>> from storage to lab3: ' + resourceType);
                             break;
                         }
+                        else if (nuker && resourceType == RESOURCE_GHODIUM && nuker.store.getFreeCapacity(RESOURCE_GHODIUM) > 0) { //----nuker need G----
+                            creep.memory.target = storage.id;
+                            creep.memory.targetResource = resourceType;
+                            // console.log('🧪A>> from storage tn: ' + resourceType);
+                            break;
+                        }
                         else if (terminal && terminalRes.includes(' ' + resourceType + ' ') && terminal.store[resourceType] < 10000) { //----terminal need for transfer----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
@@ -371,7 +418,7 @@ var roleAlchemist = {
                             // console.log('🧪A>> from storage tte: ' + resourceType);
                             break;
                         }
-                        else if (resourceType == factoryRes && factory.store[resourceType] < 600 && (storage.store[factoryPrd] + terminal.store[factoryPrd] + 100) < ((storage.store[factoryRes] + terminal.store[factoryRes])/5)) { //----factory need for produce----
+                        else if (resourceType == factoryRes && factory.store[resourceType] < 600 && (storage.store[factoryPrd] + terminal.store[factoryPrd]) * 5 < (storage.store[factoryRes] + terminal.store[factoryRes])) { //----factory need for produce----
                             creep.memory.target = storage.id;
                             creep.memory.targetResource = resourceType;
                             // console.log('🧪A>> from storage tf: ' + resourceType);
@@ -439,7 +486,7 @@ var roleAlchemist = {
                     creep.memory.targetResource = lab2.mineralType;
                     // console.log('🧪A>> from lab2: ' + lab2.mineralType);
                 }
-                else if (lab4 && lab4.mineralType && (lab4.mineralType != lab4Res || lab4.store[lab4Res] > 500)) { //----clear lab4----
+                else if (lab4 && lab4.mineralType && (lab4.mineralType != lab4Res || lab4.store[lab4Res] > 1100)) { //----clear lab4----
                     creep.memory.target = lab4.id;
                     creep.memory.targetResource = lab4.mineralType;
                     // console.log('🧪A>> from lab4: ' + lab4.mineralType);
@@ -464,7 +511,7 @@ var roleAlchemist = {
                     creep.memory.targetResource = lab7.mineralType;
                     // console.log('🧪A>> from lab3: ' + lab3.mineralType);
                 }
-                else if (labM && labM.mineralType) { //----clear labM----
+                else if (labM && labM.mineralType && labM.store[labM.mineralType] > 50) { //----clear labM----
                     creep.memory.target = labM.id;
                     creep.memory.targetResource = labM.mineralType;
                     // console.log('🧪A>> from labM: ' + labM.mineralType);
@@ -502,7 +549,7 @@ var roleAlchemist = {
                         // creep.moveTo(target, { reusePath: 3, visualizePathStyle: { stroke: '#ffeb0b' } });
                         creep.moveByPath(creep.memory.path);
                         creep.say('🧪>' + target.pos.x + ',' + target.pos.y);
-                        creep.room.visual.line(creep.pos, target.pos, {color: '#ffeb0b', width:0.1, lineStyle: 'dashed'});
+                        creep.room.visual.line(creep.pos, target.pos, { color: '#ffeb0b', width: 0.1, lineStyle: 'dashed' });
                     }
                     else {
                         delete creep.memory.target;

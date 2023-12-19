@@ -64,8 +64,8 @@ var roleHarvester = {
                             creep.memory.path = creep.pos.findPathTo(link);
                         }
                         creep.moveByPath(creep.memory.path);
-                        creep.room.visual.text('⛏️', link.pos, {fontSize:10 });
-                        creep.room.visual.line(creep.pos, link.pos, {color: '#ffffff', width:0.1, lineStyle: 'dotted'});
+                        creep.room.visual.text('⛏️', link.pos, { fontSize: 10 });
+                        creep.room.visual.line(creep.pos, link.pos, { color: '#ffffff', width: 0.1, lineStyle: 'dotted' });
                         if (creep.memory.path.length > 0) {
                             // 获取creep的路线
                             let path = creep.memory.path;
@@ -91,7 +91,7 @@ var roleHarvester = {
                                 || structure.structureType == STRUCTURE_TOWER)
                                 && structure.my)
                                 || structure.structureType == STRUCTURE_CONTAINER)
-                                && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                                && structure.store.getFreeCapacity(RESOURCE_ENERGY) >= 50;
                         }
                     })
                 }
@@ -100,8 +100,8 @@ var roleHarvester = {
                 if (target) {
                     let wayToDischarge = creep.pos.getRangeTo(target);
                     // let wayToHarvest = creep.pos.getRangeTo(Game.getObjectById(creep.memory.workingSlot));
-                    creep.say('⛏️ S:' + wayToDischarge );
-                    if (wayToDischarge > 6) {
+                    creep.say('⛏️ S:' + wayToDischarge);
+                    if (wayToDischarge > 5) {
                         creep.drop(RESOURCE_ENERGY);
                         creep.memory.discharging = false;
                         creep.say('⛏️ 采集');
@@ -112,8 +112,8 @@ var roleHarvester = {
                                 creep.memory.path = creep.pos.findPathTo(target);
                             }
                             creep.moveByPath(creep.memory.path);
-                            creep.room.visual.text('⛏️', target.pos, {fontSize:10 });
-                            creep.room.visual.line(creep.pos, target.pos, {color: '#ffffff', width:0.1, lineStyle: 'dotted'});
+                            creep.room.visual.text('⛏️', target.pos, { fontSize: 10 });
+                            creep.room.visual.line(creep.pos, target.pos, { color: '#ffffff', width: 0.1, lineStyle: 'dotted' });
                             if (creep.memory.path.length > 0) {
                                 // 获取creep的路线
                                 let path = creep.memory.path;
@@ -146,15 +146,15 @@ var roleHarvester = {
                 //             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                 //     }
                 // });
-
-                if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
+                let result = creep.harvest(target);
+                if (result == ERR_NOT_IN_RANGE) {
                     // creep.moveTo(target, {reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#ffffff', opacity: 0.8 } });
                     if (!creep.memory.path) {
                         creep.memory.path = creep.pos.findPathTo(target);
                     }
                     creep.moveByPath(creep.memory.path);
-                    creep.room.visual.text('⛏️', target.pos, {fontSize:10 });
-                    creep.room.visual.line(creep.pos, target.pos, {color: '#ffffff', width:0.1, lineStyle: 'dotted'});
+                    creep.room.visual.text('⛏️', target.pos, { fontSize: 10 });
+                    creep.room.visual.line(creep.pos, target.pos, { color: '#ffffff', width: 0.1, lineStyle: 'dotted' });
                     if (creep.memory.path.length > 0) {
                         // 获取creep的路线
                         let path = creep.memory.path;
@@ -169,6 +169,11 @@ var roleHarvester = {
                     else {
                         delete creep.memory.path;
                     }
+                }
+                else if (result == ERR_NOT_ENOUGH_RESOURCES) {
+                    delete creep.memory.workingSlot;
+                    delete creep.memory.path;
+                    creep.memory.discharging = true;
                 }
 
                 // if(link.store.getFreeCapacity(RESOURCE_ENERGY)>0){

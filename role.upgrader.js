@@ -41,7 +41,7 @@ var roleUpgrader = {
 
         for (let bodyPart of creep.body) {
             if (bodyPart.boost) {
-                creep.memory.boosted = creep.body.boost;
+                creep.memory.boosted = bodyPart.boost;
                 break;
             }
             else {
@@ -51,8 +51,8 @@ var roleUpgrader = {
         if (!creep.memory.boostLab || creep.memory.boostLab == '') {
             let boostLabs = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_LAB 
-                    && structure.store[RESOURCE_GHODIUM_HYDRIDE] > 50);
+                    return (structure.structureType == STRUCTURE_LAB
+                        && structure.store[RESOURCE_GHODIUM_ACID] > 50);
                 }
             });
             if (boostLabs.length > 0) {
@@ -62,14 +62,14 @@ var roleUpgrader = {
                 creep.memory.boostLab = '';
             }
         }
-        if (creep.memory.boosted == '' && creep.ticksToLive > 1200 && creep.memory.boostLab != '') {
+        if (creep.memory.boosted == '' && creep.ticksToLive > 1300 && creep.memory.boostLab != '') {
             if (Game.getObjectById(creep.memory.boostLab).boostCreep(creep) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(Game.getObjectById(creep.memory.boostLab), { reusePath: 10, visualizePathStyle: { stroke: '#ff3300', opacity: 0.8 } });
             }
         }
-        else if (creep.memory.boosted != '' && creep.ticksToLive < 20) {
+        else if (creep.memory.boosted != '' && creep.ticksToLive <= 20) {
             if (Game.getObjectById(creep.memory.boostLab).unboostCreep(creep) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(Game.getObjectById(creep.memory.boostLab), { reusePath: 20, visualizePathStyle: { stroke: '#ff3300', opacity: 0.8 } });
+                creep.moveTo(Game.getObjectById(creep.memory.boostLab), { reusePath: 10, visualizePathStyle: { stroke: '#ff3300', opacity: 0.8 } });
             }
         }
         else {
@@ -78,7 +78,7 @@ var roleUpgrader = {
                 creep.moveTo(new RoomPosition(25, 25, creep.memory.loc), { reusePath: 20, visualizePathStyle: { stroke: '#ff3300', opacity: 0.8 } });
             } else {
                 if (creep.memory.upgrading) { //----upgrade----
-    
+
                     if (creep.upgradeController(Game.rooms[creep.memory.loc].controller) == ERR_NOT_IN_RANGE) {
                         creep.moveByPath(creep.memory.path);
                     }
@@ -105,7 +105,7 @@ var roleUpgrader = {
                                 creep.memory.path = creep.pos.findPathTo(target);
                             }
                             creep.moveByPath(creep.memory.path);
-                            creep.room.visual.line(creep.pos, target.pos, {color: '#ff3300', width:0.1, lineStyle: 'dotted'});
+                            creep.room.visual.line(creep.pos, target.pos, { color: '#ff3300', width: 0.1, lineStyle: 'dotted' });
                             if (creep.memory.path.length > 0) {
                                 // 获取creep的路线
                                 var path = creep.memory.path;
@@ -141,7 +141,7 @@ var roleUpgrader = {
                                 }
                                 creep.moveByPath(creep.memory.path);
                                 creep.say('⚡ E:' + target.amount);
-                                creep.room.visual.line(creep.pos, target.pos, {color: '#ff3300', width:0.1, lineStyle: 'dotted'});
+                                creep.room.visual.line(creep.pos, target.pos, { color: '#ff3300', width: 0.1, lineStyle: 'dotted' });
                                 if (creep.memory.path.length > 0) {
                                     // 获取creep的路线
                                     var path = creep.memory.path;
@@ -170,7 +170,7 @@ var roleUpgrader = {
                                     creep.memory.path = creep.pos.findPathTo(target);
                                 }
                                 creep.moveByPath(creep.memory.path);
-                                creep.room.visual.line(creep.pos, target.pos, {color: '#ff3300', width:0.1, lineStyle: 'dotted'});
+                                creep.room.visual.line(creep.pos, target.pos, { color: '#ff3300', width: 0.1, lineStyle: 'dotted' });
                             }
                             else {
                                 delete creep.memory.path;
