@@ -18,10 +18,8 @@ var roleFighter = {
             Memory.whitelist = {};
         }
         // Memory.whitelist['Jerdaz'] = true;
-        // Memory.whitelist['Fatoribo'] = true;
 
         // console.log('⚔️ F: whitelist' + Memory.whiteList);
-        // creep.memory.destiny = 'W5N28';
         if (creep.room.name != creep.memory.destiny) {
             creep.say('F' + creep.memory.destiny);
             creep.moveTo(new RoomPosition(25, 25, creep.memory.destiny));

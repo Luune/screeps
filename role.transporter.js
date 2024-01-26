@@ -1,5 +1,5 @@
 var roleTransporter = {
-    run: function (creep, roomName, sortedEnergys, tombstones, order) {
+    run: function (creep, roomName, sortedEnergys, tombstones) {
         // console.log('T>> dropped energy: '+sortedEnergys);
         //----set status----
         if (creep.memory.transporting && creep.store.getUsedCapacity() == 0) {
@@ -17,35 +17,16 @@ var roleTransporter = {
             creep.say('🚚 运输');
         }
 
-        // var closestHostile = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        // var emptyExtensions = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
-        //     filter: (structure) => {
-        //         return (structure.structureType == STRUCTURE_EXTENSION
-        //             || structure.structureType == STRUCTURE_SPAWN)
-        //             && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-        //     }
-        // });
         if (!creep.memory.extensions) {
-            // 获取房间内所有储存energy的容器
             let containersWithEnergy = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_POWER_SPAWN);
                 }
             });
-            // 将容器的id写入creep的memory中
             creep.memory.extensions = containersWithEnergy.map(container => container.id);
         }
-        // var emptyTowerLabs = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
-        //     filter: (structure) => {
-        //         return ((structure.structureType == STRUCTURE_TOWER
-        //             || structure.structureType == STRUCTURE_LAB)
-        //             && structure.store.getFreeCapacity(RESOURCE_ENERGY) >= 100)
-        //             || (structure.structureType == STRUCTURE_FACTORY
-        //                 && structure.store.getUsedCapacity(RESOURCE_ENERGY) < 200);
-        //     }
-        // });
+
         if (!creep.memory.towerLabs) {
-            // 获取房间内所有储存energy的容器
             let containersWithEnergy = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_TOWER
@@ -54,56 +35,25 @@ var roleTransporter = {
                         || structure.structureType == STRUCTURE_NUKER);
                 }
             });
-            // 将容器的id写入creep的memory中
             creep.memory.towerLabs = containersWithEnergy.map(container => container.id);
         }
-        // var containersToFill = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
-        //     filter: (structure) => {
-        //         return structure.structureType == STRUCTURE_CONTAINER
-        //             && structure.store.getFreeCapacity(RESOURCE_ENERGY) >= 800;
-        //     }
-        // });
-        // var containersToLoot = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
-        //     filter: (structure) => {
-        //         return (structure.structureType == STRUCTURE_CONTAINER)
-        //             && structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50;
-        //     }
-        // });
+
         if (!creep.memory.containers) {
-            // 获取房间内所有储存energy的容器
             let containersWithEnergy = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_CONTAINER);
                 }
             });
-            // 将容器的id写入creep的memory中
             creep.memory.containers = containersWithEnergy.map(container => container.id);
         }
-        // var linksToLoot = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
-        //     filter: (structure) => {
-        //         return (structure.structureType == STRUCTURE_LINK)
-        //             && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 400;
-        //     }
-        // });
+
         if (!creep.memory.linksToLoot) {
-            // 获取房间内所有储存energy的容器
             let containersWithEnergy = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_LINK);
+                    return (structure.structureType == STRUCTURE_LINK && Object.values(Game.flags).some(flag => flag.name.includes("pickLink") && flag.pos.isEqualTo(structure.pos)));
                 }
             });
-            // 将容器的id写入creep的memory中
             creep.memory.linksToLoot = containersWithEnergy.map(container => container.id);
-        }
-        if (!creep.memory.roomStorage && creep.room.storage) {
-            creep.memory.roomStorage = Game.rooms[creep.memory.loc].storage.id;
-        }
-        if (!creep.memory.roomTerminal && creep.room.terminal) {
-            creep.memory.roomTerminal = Game.rooms[creep.memory.loc].terminal.id;
-        }
-        if (Game.getObjectById(creep.memory.roomTerminal)) {
-            var terminal1 = Game.getObjectById(creep.memory.roomTerminal);
-            var terminalEn = terminal1.store.getUsedCapacity(RESOURCE_ENERGY);
         }
 
         //----trans----
@@ -112,12 +62,13 @@ var roleTransporter = {
                 delete creep.memory.targetResource;
                 delete creep.memory.path;
                 //----store minerals----
-                let emptyStorage = Game.getObjectById(creep.memory.roomStorage);
+                // let emptyStorage = Game.getObjectById(creep.memory.roomStorage);
+                let emptyStorage = creep.room.storage;
                 findTargetToFill:
                 for (let resourceType of Object.keys(creep.store)) {
                     // console.log('T>> carrying: ' + resourceType + ': ' + creep.store[resourceType]);
                     if (resourceType != RESOURCE_ENERGY && emptyStorage) {
-                        creep.memory.target = creep.memory.roomStorage;
+                        creep.memory.target = emptyStorage.id;
                         creep.memory.targetResource = resourceType;
                         // console.log('🚚 T>> resources to storage: ' + emptyStorage.id);
                         break findTargetToFill;
@@ -137,43 +88,8 @@ var roleTransporter = {
                             }
                             // console.log('🚚 T>> to extension: ' + emptyExtensions[0].id);
                         }
-                        //----fill tower/lab/factory----
-                        let emptyTowerLabs = creep.memory.towerLabs;
-                        if (emptyTowerLabs.length > 0) {
-                            for (let id of emptyTowerLabs) {
-                                let container = Game.getObjectById(id);
-                                if ((container.structureType == STRUCTURE_TOWER
-                                    || container.structureType == STRUCTURE_LAB)
-                                    && container.store.getFreeCapacity(RESOURCE_ENERGY) >= 100) {
-                                    creep.memory.target = id;
-                                    creep.memory.targetResource = resourceType;
-                                    // console.log('T>> to tower/lab: ' + target.id);
-                                    break findTargetToFill;
-                                }
-                                else if (container.structureType == STRUCTURE_FACTORY
-                                    && container.store[RESOURCE_ENERGY] < 200) {
-                                    creep.memory.target = id;
-                                    creep.memory.targetResource = resourceType;
-                                    // console.log('T>> to tower/lab: ' + target.id);
-                                    break findTargetToFill;
-                                }
-                                else if (container.structureType == STRUCTURE_NUKER && container.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-                                    creep.memory.target = id;
-                                    creep.memory.targetResource = resourceType;
-                                    // console.log('T>> to tower/lab: ' + target.id);
-                                    break findTargetToFill;
-                                }
-                            }
-                        }
-                        //----trade cost----
-                        if (terminalEn < 8000) {
-                            creep.memory.target = terminal1.id;
-                            creep.memory.targetResource = resourceType;
-                            // console.log('🚚 T>> to terminal EN: ' + terminal1.id);
-                            break findTargetToFill;
-                        }
                         //----fill container----
-                        else if (creep.memory.containers.length > 0) {
+                        if (creep.memory.containers.length > 0) {
                             let containerIds = creep.memory.containers;
                             // 根据容器ID获取容器对象，并计算储量
                             let containerStores = containerIds.map(id => {
@@ -192,21 +108,49 @@ var roleTransporter = {
                                     }
                                 });
                                 // console.log(id + ' con ' + flagFill.length);
-                                if (flagFill.length > 0 && eContainer.store.getFreeCapacity(RESOURCE_ENERGY) > 800) { //eContainer.store[RESOURCE_ENERGY] < 1000 &&
+                                if (flagFill.length > 0 && eContainer.store.getFreeCapacity(RESOURCE_ENERGY) >= 200) { //eContainer.store[RESOURCE_ENERGY] < 1000 &&
                                     creep.memory.target = id;
                                     creep.memory.targetResource = resourceType;
                                     // console.log('T>> to container: ' + creep.memory.target);
                                     break findTargetToFill;
                                 }
                             }
-                            //----fill storage----
-                            if (!creep.memory.target && emptyStorage) {
-                                // creep.memorytarget = creep.pos.findClosestByRange(emptyStorages).id;
-                                creep.memory.target = emptyStorage.id;
-                                creep.memory.targetResource = resourceType;
-                                // console.log('T>> to storage: ' + target.id);
-                                break findTargetToFill;
+                        }
+                        //----fill tower/lab/nuker----
+                        let emptyTowerLabs = creep.memory.towerLabs;
+                        if (emptyTowerLabs.length > 0) {
+                            for (let id of emptyTowerLabs) {
+                                let container = Game.getObjectById(id);
+                                if ((container.structureType == STRUCTURE_TOWER
+                                    || container.structureType == STRUCTURE_LAB)
+                                    && container.store.getFreeCapacity(RESOURCE_ENERGY) >= 100) {
+                                    creep.memory.target = id;
+                                    creep.memory.targetResource = resourceType;
+                                    // console.log('T>> to tower/lab: ' + target.id);
+                                    break findTargetToFill;
+                                }
+                                else if (container.structureType == STRUCTURE_NUKER && container.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                                    creep.memory.target = id;
+                                    creep.memory.targetResource = resourceType;
+                                    // console.log('T>> to tower/lab: ' + target.id);
+                                    break findTargetToFill;
+                                }
                             }
+                        }
+                        //----fill building creep----
+                        if (creep.room.find(FIND_CONSTRUCTION_SITES).length > 0) {
+                            let buildinger = creep.room.find(FIND_CREEPS, {filter: creep => creep.memory.role == 'builder'});
+                            creep.memory.target = buildinger[0].id;
+                            creep.memory.targetResource = resourceType;
+                            break findTargetToFill;
+                        }
+                        //----fill storage----
+                        if (emptyStorage) {
+                            // creep.memory.target = creep.pos.findClosestByRange(emptyStorages).id;
+                            creep.memory.target = emptyStorage.id;
+                            creep.memory.targetResource = resourceType;
+                            // console.log('T>> to storage: ' + target.id);
+                            break findTargetToFill;
                         }
                     }
                 }
@@ -219,24 +163,33 @@ var roleTransporter = {
                     var result = creep.transfer(target, targetResource);
                     // console.log('🚚 T>> ' + creep.name + ' to ' + target.id + ' ' + targetResource + ' ' + result);
                     if (result == ERR_NOT_IN_RANGE) {
-                        // if (!creep.memory.path) {
-                        //     creep.memory.path = creep.pos.findPathTo(target);
-                        // }
-                        // else {
-                        //     // 获取creep的路线
-                        //     let path = creep.memory.path;
-                        //     // 获取下一步位置
-                        //     let nextStep = new RoomPosition(path[0].x, path[0].y, roomName);
-                        //     // 在下一步位置查找所有对象
-                        //     let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
-                        //     if (objects.length > 0) {
-                        //         delete creep.memory.path;
-                        //     }
-                        // }
-                        // creep.moveByPath(creep.memory.path);
-                        creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target) / 2, visualizePathStyle: { stroke: '#00ff00', opacity: 0.8 } });
-                        creep.say('🚚 ' + target.pos.x + ',' + target.pos.y);
-                        // creep.room.visual.line(creep.pos, target.pos, {color: '#00ff00', width:0.1, lineStyle: 'dashed'});
+                        if (creep.store[targetResource] >= creep.pos.getRangeTo(target)) {
+                            // if (!creep.memory.path) {
+                            //     creep.memory.path = creep.pos.findPathTo(target);
+                            // }
+                            // else {
+                            //     // 获取creep的路线
+                            //     let path = creep.memory.path;
+                            //     // 获取下一步位置
+                            //     let nextStep = new RoomPosition(path[0].x, path[0].y, roomName);
+                            //     // 在下一步位置查找所有对象
+                            //     let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
+                            //     if (objects.length > 0) {
+                            //         delete creep.memory.path;
+                            //     }
+                            // }
+                            // creep.moveByPath(creep.memory.path);
+                            creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target) / 2, visualizePathStyle: { stroke: '#00ff00', opacity: 0.8 } });
+                            creep.say('🚚 ' + target.pos.x + ',' + target.pos.y);
+                            // creep.room.visual.line(creep.pos, target.pos, {color: '#00ff00', width:0.1, lineStyle: 'dashed'});
+                        }
+                        else {
+                            delete creep.memory.target;
+                            delete creep.memory.targetResource;
+                            delete creep.memory.path;
+                            creep.memory.transporting = false;
+                            creep.say('🚛 收集');
+                        }
                     }
                     else {
                         delete creep.memory.target;
@@ -279,24 +232,23 @@ var roleTransporter = {
                         creep.memory.targetResource = resourceType;
                     }
                 }
-                //----pick terminal extra energy----
-                else if (terminal1 && terminalEn > 8500) {
-                    creep.memory.target = terminal1.id;
-                    creep.memory.targetResource = RESOURCE_ENERGY;
-                }
-
+                // //----pick terminal extra energy----
+                // else if (terminal1 && terminalEn > 8500) {
+                //     creep.memory.target = terminal1.id;
+                //     creep.memory.targetResource = RESOURCE_ENERGY;
+                // }
                 else {
                     //----pick link----
                     let linksToLoot = creep.memory.linksToLoot;
                     // 遍历容器id列表
                     for (let id of linksToLoot) {
                         let container = Game.getObjectById(id);
-                        let flagPick = container.pos.lookFor(LOOK_FLAGS, {
-                                filter: (flag) => {
-                                    return flag.name.includes('pickLink');
-                                }
-                            });
-                        if (container && container.store.getUsedCapacity(RESOURCE_ENERGY) > 400 && flagPick.length > 0) {
+                        // let flagPick = container.pos.lookFor(LOOK_FLAGS, {
+                        //     filter: (flag) => {
+                        //         return flag.name.includes('pickLink');
+                        //     }
+                        // });
+                        if (container && container.store.getUsedCapacity(RESOURCE_ENERGY) > 100 ) {
                             creep.memory.target = id;
                             creep.memory.targetResource = RESOURCE_ENERGY;
                             break;
@@ -330,9 +282,10 @@ var roleTransporter = {
                         }
                         if (!creep.memory.target) {
                             //----pick storage----
-                            let storage = Game.getObjectById(creep.memory.roomStorage);
+                            // let storage = Game.getObjectById(creep.memory.roomStorage);
+                            let storage = creep.room.storage;
                             let emptyExtensions = creep.memory.extensions;
-                            if (storage.store[RESOURCE_ENERGY] > 10000) {
+                            if (storage && storage.store[RESOURCE_ENERGY] > 10000) {
                                 for (let id of emptyExtensions) {
                                     let container = Game.getObjectById(id);
                                     if (container && container.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
@@ -342,10 +295,13 @@ var roleTransporter = {
                                     }
                                 }
                                 // //----没得捡了就存掉----
-                                // if (creep.store.getFreeCapacity(RESOURCE_ENERGY) < creep.store.getCapacity() / 2) {
-                                //     creep.memory.transporting = true;
-                                //     creep.say('🚛 transport');
-                                // }
+                                if (creep.store.getFreeCapacity(RESOURCE_ENERGY) <= creep.store.getCapacity() - 50) {
+                                    creep.memory.transporting = true;
+                                    delete creep.memory.target;
+                                    delete creep.memory.targetResource;
+                                    delete creep.memory.path;
+                                    creep.say('🚚 运输');
+                                }
                             }
                         }
                     }

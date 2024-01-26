@@ -10,7 +10,7 @@
 var roleUpgrader = {
 
     /** @param {Creep} creep **/
-    run: function (creep, roomName, enAvail, storageStorage) {
+    run: function (creep) {
         //---set status----
         if (creep.memory.upgrading && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.upgrading = false;
@@ -67,7 +67,7 @@ var roleUpgrader = {
                 creep.moveTo(Game.getObjectById(creep.memory.boostLab), { reusePath: 10, visualizePathStyle: { stroke: '#ff3300', opacity: 0.8 } });
             }
         }
-        else if (creep.memory.boosted != '' && creep.ticksToLive <= 20) {
+        else if (creep.memory.boosted != '' && creep.ticksToLive <= 50) {
             if (Game.getObjectById(creep.memory.boostLab).unboostCreep(creep) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(Game.getObjectById(creep.memory.boostLab), { reusePath: 10, visualizePathStyle: { stroke: '#ff3300', opacity: 0.8 } });
             }
@@ -105,7 +105,7 @@ var roleUpgrader = {
                                 creep.memory.path = creep.pos.findPathTo(target);
                             }
                             creep.moveByPath(creep.memory.path);
-                            creep.room.visual.line(creep.pos, target.pos, { color: '#ff3300', width: 0.1, lineStyle: 'dotted' });
+                            creep.room.visual.line(creep.pos, target.pos, { color: '#ff3300', width: 0.1, lineStyle: 'dotted', opacity: 0.8 });
                             if (creep.memory.path.length > 0) {
                                 // 获取creep的路线
                                 var path = creep.memory.path;
@@ -141,7 +141,7 @@ var roleUpgrader = {
                                 }
                                 creep.moveByPath(creep.memory.path);
                                 creep.say('⚡ E:' + target.amount);
-                                creep.room.visual.line(creep.pos, target.pos, { color: '#ff3300', width: 0.1, lineStyle: 'dotted' });
+                                creep.room.visual.line(creep.pos, target.pos, { color: '#ff3300', width: 0.1, lineStyle: 'dotted', opacity: 0.8 });
                                 if (creep.memory.path.length > 0) {
                                     // 获取creep的路线
                                     var path = creep.memory.path;
@@ -170,7 +170,7 @@ var roleUpgrader = {
                                     creep.memory.path = creep.pos.findPathTo(target);
                                 }
                                 creep.moveByPath(creep.memory.path);
-                                creep.room.visual.line(creep.pos, target.pos, { color: '#ff3300', width: 0.1, lineStyle: 'dotted' });
+                                creep.room.visual.line(creep.pos, target.pos, { color: '#ff3300', width: 0.1, lineStyle: 'dotted', opacity: 0.8 });
                             }
                             else {
                                 delete creep.memory.path;

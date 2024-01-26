@@ -10,6 +10,8 @@
 var roleBuilder = {
     /** @param {Creep} creep **/
     run: function (creep, roomName, enAvail, storageStorage, dismantleTargetId) {
+        //----test cpu
+                    // const startCpu = Game.cpu.getUsed();
         //----set status----
         if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.building = false;
@@ -54,14 +56,15 @@ var roleBuilder = {
                         creep.memory.path = creep.pos.findPathTo(target);
                     }
                     creep.moveByPath(creep.memory.path);
-                    creep.say('🛠️ 建造');
+                    creep.say('🏗️️ 建造');
                     creep.room.visual.text('🚧', target.pos, { fontSize: 10 });
-                    creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.1, lineStyle: 'dotted' });
+                    creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.2, lineStyle: 'dotted', opacity: 0.8});
                     if (creep.memory.path.length > 0) {
                         // 获取creep的路线
                         let path = creep.memory.path;
                         // 获取下一步位置
-                        let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                        // let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                        let nextStep = creep.room.getPositionAt(path[0].x,path[0].y);
                         // 在下一步位置查找所有对象
                         let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
                         if (objects.length > 0) {
@@ -79,7 +82,7 @@ var roleBuilder = {
                 let target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
                     filter: (structure) => {
                         return (structure.structureType == STRUCTURE_TOWER)
-                            && structure.store.getFreeCapacity(RESOURCE_ENERGY) >= 100;
+                            && structure.store.getFreeCapacity(RESOURCE_ENERGY) >= 300;
                     }
                 });
                 if (target) {
@@ -94,13 +97,14 @@ var roleBuilder = {
                         }
                         creep.moveByPath(creep.memory.path);
                         creep.say('🚧 填充防御塔');
-                        creep.room.visual.text('🚧', target.pos, { fontSize: 10 });
-                        creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.1, lineStyle: 'dotted' });
+                        creep.room.visual.text('⛽', target.pos, { fontSize: 10 });
+                        creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.2, lineStyle: 'dotted', opacity: 0.8 });
                         if (creep.memory.path.length > 0) {
                             // 获取creep的路线
                             let path = creep.memory.path;
                             // 获取下一步位置
-                            let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                            // let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                            let nextStep = creep.room.getPositionAt(path[0].x,path[0].y);
                             // 在下一步位置查找所有对象
                             let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
                             if (objects.length > 0) {
@@ -114,6 +118,38 @@ var roleBuilder = {
                 }
                 else { //----fix----
                     if (!creep.memory.target) {
+                        switch (Math.floor(storageStorage / 100000)) {
+                            case 0:
+                            case 1:
+                                var fixHit = 300000;
+                                break;
+                            case 2:
+                            case 3:
+                                var fixHit = 1000000;
+                                break;
+                            case 4:
+                                var fixHit = 2000000;
+                                break;
+                            case 5:
+                                var fixHit = 5000000;
+                                break;
+                            case 6:
+                                var fixHit = 10000000;
+                                break;
+                            case 7:
+                                var fixHit = 50000000;
+                                break;
+                            case 8:
+                                var fixHit = 100000000;
+                                break;
+                            case 9:
+                            case 10:
+                                var fixHit = 300000000;
+                                break;
+                            default:
+                                var fixHit = 300000;
+                                break;
+                        }
                         let damagedStructures = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
                             filter: (structure) => {
                                 return (structure.hits < structure.hitsMax
@@ -121,11 +157,12 @@ var roleBuilder = {
                                     && structure.structureType != STRUCTURE_RAMPART)
                                 || (structure.hits < structure.hitsMax
                                     && (structure.structureType == STRUCTURE_WALL || structure.structureType == STRUCTURE_RAMPART)
-                                    && structure.hits < ((structure.room.controller.level * 10000) + storageStorage * 10));
+                                    && structure.hits < fixHit);
                             }
                         });
                         if (damagedStructures.length > 0) {
-                            creep.memory.target = _.sortBy(damagedStructures, s => s.hits)[0].id;
+                            let sortedStructures = _.sortBy(damagedStructures, s => s.hits);
+                            creep.memory.target = _.sortBy(sortedStructures, [s => creep.pos.getRangeTo(s), s => s.hits])[0].id;
                         }
                         delete creep.memory.path;
                     }
@@ -139,12 +176,13 @@ var roleBuilder = {
                             }
                             creep.moveByPath(creep.memory.path);
                             creep.say('🛠️ 修理');
-                            creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.1, lineStyle: 'dotted' });
+                            creep.room.visual.line(creep.pos, target.pos, { color: '#0099ff', width: 0.2, lineStyle: 'dotted', opacity: 0.8 });
                             if (creep.memory.path.length > 0) {
                                 // 获取creep的路线
                                 let path = creep.memory.path;
                                 // 获取下一步位置
-                                let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                // let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                let nextStep = creep.room.getPositionAt(path[0].x,path[0].y);
                                 // 在下一步位置查找所有对象
                                 let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
                                 if (objects.length > 0) {
@@ -205,7 +243,8 @@ var roleBuilder = {
                             // 获取creep的路线
                             let path = creep.memory.path;
                             // 获取下一步位置
-                            let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                            // let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                            let nextStep = creep.room.getPositionAt(path[0].x,path[0].y);
                             // 在下一步位置查找所有对象
                             let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
                             if (objects.length > 0) {
@@ -222,13 +261,17 @@ var roleBuilder = {
                     let containers = Game.rooms[creep.memory.loc].find(FIND_STRUCTURES, {
                         filter: (structure) => {
                             return (structure.structureType == STRUCTURE_CONTAINER
-                                // || structure.structureType == STRUCTURE_LINK
+                                || structure.structureType == STRUCTURE_LINK
                             )
                                 && structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50;
                         }
                     });
+                    if (creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY] >= 300000) {
+                        containers.push(creep.room.storage);
+                    }
+                    // containers =  _.sortBy(containers, s => creep.pos.getRangeTo(s));
                     if (containers.length > 0) {
-                        let target = creep.pos.findClosestByPath(containers);
+                        let target = creep.pos.findClosestByRange(containers);
                         if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                             // creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target)/2, visualizePathStyle: { stroke: '#0099ff', opacity: 0.8 } });
                             // creep.say('🚧C:' + target.pos.x + ',' + target.pos.y);
@@ -243,7 +286,8 @@ var roleBuilder = {
                                 // 获取creep的路线
                                 let path = creep.memory.path;
                                 // 获取下一步位置
-                                let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                // let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                let nextStep = creep.room.getPositionAt(path[0].x,path[0].y);
                                 // 在下一步位置查找所有对象
                                 let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
                                 if (objects.length > 0) {
@@ -278,7 +322,8 @@ var roleBuilder = {
                                     // 获取creep的路线
                                     let path = creep.memory.path;
                                     // 获取下一步位置
-                                    let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                    // let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                    let nextStep = creep.room.getPositionAt(path[0].x,path[0].y);
                                     // 在下一步位置查找所有对象
                                     let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
                                     if (objects.length > 0) {
@@ -307,7 +352,8 @@ var roleBuilder = {
                                     // 获取creep的路线
                                     let path = creep.memory.path;
                                     // 获取下一步位置
-                                    let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                    // let nextStep = new RoomPosition(path[0].x, path[0].y, creep.room.name);
+                                    let nextStep = creep.room.getPositionAt(path[0].x,path[0].y);
                                     // 在下一步位置查找所有对象
                                     let objects = creep.room.lookForAt(LOOK_CREEPS, nextStep.x, nextStep.y);
                                     if (objects.length > 0) {
@@ -323,6 +369,9 @@ var roleBuilder = {
                 }
             } //----dismantle temp disable
         }
+        //----test cpu
+                    // const elapsed = Game.cpu.getUsed() - startCpu;
+                    // console.log('Creep has used '+elapsed+' CPU time');
     }
 };
 

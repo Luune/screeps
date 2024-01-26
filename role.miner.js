@@ -38,24 +38,24 @@ var roleMiner = {
         if (creep.memory.discharging) {
             //----store minerals----
             // console.log('⛏️ MN>> carrying: ' + creep.memory.miningType + ': ' + creep.store[creep.memory.miningType]);
-            var minerLab = creep.pos.findClosestByRange(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_LAB)
-                        && structure.store.getFreeCapacity(creep.memory.miningType) > 0;
-                }
-            });
-            if (minerLab && creep.pos.getRangeTo(minerLab) <= 2) {
-                var target = minerLab;
-            } else {
-                var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+            if (!creep.memory.minerLab) {
+                let minerLab = creep.pos.findClosestByRange(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_STORAGE)
-                            && structure.store.getFreeCapacity(Memory.structures.lab1.resource) > 0;
+                        return (structure.structureType == STRUCTURE_LAB)
+                            && structure.store.getFreeCapacity(creep.memory.miningType) > 0;
                     }
                 });
+                if (minerLab && creep.pos.getRangeTo(minerLab) <= 2) {
+                    creep.memory.minerLab = minerLab.id;
+                } else {
+                    creep.memory.minerLab = creep.room.storage.id;
+                }
             }
-            if (creep.transfer(target, creep.memory.miningType) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target) / 2, visualizePathStyle: { stroke: '#ffff00' } });
+            let target = Game.getObjectById(creep.memory.minerLab);
+            if (target) {
+                if (creep.transfer(target, creep.memory.miningType) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target) / 2, visualizePathStyle: { stroke: '#ffff00' } });
+                }
             }
         }
         else { //----mining----
@@ -63,18 +63,20 @@ var roleMiner = {
             if (creep.room.name != creep.memory.loc) {
                 creep.moveTo(new RoomPosition(25, 25, creep.memory.loc), { reusePath: 20 });
             } else {
-                if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target) / 2, visualizePathStyle: { stroke: '#ffff00' } });
-                }
-                if (target.mineralAmount == 0) {
-                    if (creep.pos.getRangeTo(creep.room.storage) <= 3) {
-                        creep.suicide();
+                if (creep.room.storage.store[creep.memory.miningType] < 300000) {
+                    if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(target, { reusePath: creep.pos.getRangeTo(target) / 2, visualizePathStyle: { stroke: '#ffff00' } });
                     }
-                    else if (!creep.memory.path) {
-                        let target = creep.room.storage;
-                        creep.memory.path = creep.pos.findPathTo(target);
+                    if (target.mineralAmount == 0) {
+                        if (creep.pos.getRangeTo(creep.room.storage) <= 3) {
+                            creep.suicide();
+                        }
+                        else if (!creep.memory.path) {
+                            let target = creep.room.storage;
+                            creep.memory.path = creep.pos.findPathTo(target);
+                        }
+                        creep.moveByPath(creep.memory.path);
                     }
-                    creep.moveByPath(creep.memory.path);
                 }
             }
         }
